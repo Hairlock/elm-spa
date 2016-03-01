@@ -6533,6 +6533,149 @@
 	                               ,forwardTo: forwardTo
 	                               ,Mailbox: Mailbox};
 	};
+	Elm.Native = Elm.Native || {};
+	Elm.Native.History = {};
+	Elm.Native.History.make = function(localRuntime){
+
+	  localRuntime.Native = localRuntime.Native || {};
+	  localRuntime.Native.History = localRuntime.Native.History || {};
+
+	  if (localRuntime.Native.History.values){
+	    return localRuntime.Native.History.values;
+	  }
+
+	  var NS = Elm.Native.Signal.make(localRuntime);
+	  var Task = Elm.Native.Task.make(localRuntime);
+	  var Utils = Elm.Native.Utils.make(localRuntime);
+	  var node = window;
+
+	  // path : Signal String
+	  var path = NS.input('History.path', window.location.pathname);
+
+	  // length : Signal Int
+	  var length = NS.input('History.length', window.history.length);
+
+	  // hash : Signal String
+	  var hash = NS.input('History.hash', window.location.hash);
+
+	  localRuntime.addListener([path.id, length.id], node, 'popstate', function getPath(event){
+	    localRuntime.notify(path.id, window.location.pathname);
+	    localRuntime.notify(length.id, window.history.length);
+	    localRuntime.notify(hash.id, window.location.hash);
+	  });
+
+	  localRuntime.addListener([hash.id], node, 'hashchange', function getHash(event){
+	    localRuntime.notify(hash.id, window.location.hash);
+	  });
+
+	  // setPath : String -> Task error ()
+	  var setPath = function(urlpath){
+	    return Task.asyncFunction(function(callback){
+	      setTimeout(function(){
+	        localRuntime.notify(path.id, urlpath);
+	        window.history.pushState({}, "", urlpath);
+	        localRuntime.notify(hash.id, window.location.hash);
+	        localRuntime.notify(length.id, window.history.length);
+
+	      },0);
+	      return callback(Task.succeed(Utils.Tuple0));
+	    });
+	  };
+
+	  // replacePath : String -> Task error ()
+	  var replacePath = function(urlpath){
+	    return Task.asyncFunction(function(callback){
+	      setTimeout(function(){
+	        localRuntime.notify(path.id, urlpath);
+	        window.history.replaceState({}, "", urlpath);
+	        localRuntime.notify(hash.id, window.location.hash);
+	        localRuntime.notify(length.id, window.history.length);
+	      },0);
+	      return callback(Task.succeed(Utils.Tuple0));
+	    });
+	  };
+
+	  // go : Int -> Task error ()
+	  var go = function(n){
+	    return Task.asyncFunction(function(callback){
+	      setTimeout(function(){
+	        window.history.go(n);
+	        localRuntime.notify(length.id, window.history.length);
+	        localRuntime.notify(hash.id, window.location.hash);
+	      }, 0);
+	      return callback(Task.succeed(Utils.Tuple0));
+	    });
+	  };
+
+	  // back : Task error ()
+	  var back = Task.asyncFunction(function(callback){
+	    setTimeout(function(){
+	      localRuntime.notify(hash.id, window.location.hash);
+	      window.history.back();
+	      localRuntime.notify(length.id, window.history.length);
+
+	    }, 0);
+	    return callback(Task.succeed(Utils.Tuple0));
+	  });
+
+	  // forward : Task error ()
+	  var forward = Task.asyncFunction(function(callback){
+	    setTimeout(function(){
+	      window.history.forward();
+	      localRuntime.notify(length.id, window.history.length);
+	      localRuntime.notify(hash.id, window.location.hash);
+	    }, 0);
+	    return callback(Task.succeed(Utils.Tuple0));
+	  });
+
+
+
+	  return {
+	    path        : path,
+	    setPath     : setPath,
+	    replacePath : replacePath,
+	    go          : go,
+	    back        : back,
+	    forward     : forward,
+	    length      : length,
+	    hash        : hash
+	  };
+
+	};
+
+	Elm.History = Elm.History || {};
+	Elm.History.make = function (_elm) {
+	   "use strict";
+	   _elm.History = _elm.History || {};
+	   if (_elm.History.values) return _elm.History.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Native$History = Elm.Native.History.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm),
+	   $Task = Elm.Task.make(_elm);
+	   var _op = {};
+	   var path = $Native$History.path;
+	   var hash = $Native$History.hash;
+	   var length = $Native$History.length;
+	   var forward = $Native$History.forward;
+	   var back = $Native$History.back;
+	   var go = $Native$History.go;
+	   var replacePath = $Native$History.replacePath;
+	   var setPath = $Native$History.setPath;
+	   return _elm.History.values = {_op: _op
+	                                ,setPath: setPath
+	                                ,replacePath: replacePath
+	                                ,go: go
+	                                ,back: back
+	                                ,forward: forward
+	                                ,length: length
+	                                ,hash: hash
+	                                ,path: path};
+	};
 	Elm.Native.Array = {};
 	Elm.Native.Array.make = function(localRuntime) {
 
@@ -12167,6 +12310,376 @@
 	                                        ,property: property
 	                                        ,attribute: attribute};
 	};
+	Elm.Native.Http = {};
+	Elm.Native.Http.make = function(localRuntime) {
+
+		localRuntime.Native = localRuntime.Native || {};
+		localRuntime.Native.Http = localRuntime.Native.Http || {};
+		if (localRuntime.Native.Http.values)
+		{
+			return localRuntime.Native.Http.values;
+		}
+
+		var Dict = Elm.Dict.make(localRuntime);
+		var List = Elm.List.make(localRuntime);
+		var Maybe = Elm.Maybe.make(localRuntime);
+		var Task = Elm.Native.Task.make(localRuntime);
+
+
+		function send(settings, request)
+		{
+			return Task.asyncFunction(function(callback) {
+				var req = new XMLHttpRequest();
+
+				// start
+				if (settings.onStart.ctor === 'Just')
+				{
+					req.addEventListener('loadStart', function() {
+						var task = settings.onStart._0;
+						Task.spawn(task);
+					});
+				}
+
+				// progress
+				if (settings.onProgress.ctor === 'Just')
+				{
+					req.addEventListener('progress', function(event) {
+						var progress = !event.lengthComputable
+							? Maybe.Nothing
+							: Maybe.Just({
+								_: {},
+								loaded: event.loaded,
+								total: event.total
+							});
+						var task = settings.onProgress._0(progress);
+						Task.spawn(task);
+					});
+				}
+
+				// end
+				req.addEventListener('error', function() {
+					return callback(Task.fail({ ctor: 'RawNetworkError' }));
+				});
+
+				req.addEventListener('timeout', function() {
+					return callback(Task.fail({ ctor: 'RawTimeout' }));
+				});
+
+				req.addEventListener('load', function() {
+					return callback(Task.succeed(toResponse(req)));
+				});
+
+				req.open(request.verb, request.url, true);
+
+				// set all the headers
+				function setHeader(pair) {
+					req.setRequestHeader(pair._0, pair._1);
+				}
+				A2(List.map, setHeader, request.headers);
+
+				// set the timeout
+				req.timeout = settings.timeout;
+
+				// enable this withCredentials thing
+				req.withCredentials = settings.withCredentials;
+
+				// ask for a specific MIME type for the response
+				if (settings.desiredResponseType.ctor === 'Just')
+				{
+					req.overrideMimeType(settings.desiredResponseType._0);
+				}
+
+				// actuall send the request
+				if(request.body.ctor === "BodyFormData")
+				{
+					req.send(request.body.formData)
+				}
+				else
+				{
+					req.send(request.body._0);
+				}
+			});
+		}
+
+
+		// deal with responses
+
+		function toResponse(req)
+		{
+			var tag = req.responseType === 'blob' ? 'Blob' : 'Text'
+			var response = tag === 'Blob' ? req.response : req.responseText;
+			return {
+				_: {},
+				status: req.status,
+				statusText: req.statusText,
+				headers: parseHeaders(req.getAllResponseHeaders()),
+				url: req.responseURL,
+				value: { ctor: tag, _0: response }
+			};
+		}
+
+
+		function parseHeaders(rawHeaders)
+		{
+			var headers = Dict.empty;
+
+			if (!rawHeaders)
+			{
+				return headers;
+			}
+
+			var headerPairs = rawHeaders.split('\u000d\u000a');
+			for (var i = headerPairs.length; i--; )
+			{
+				var headerPair = headerPairs[i];
+				var index = headerPair.indexOf('\u003a\u0020');
+				if (index > 0)
+				{
+					var key = headerPair.substring(0, index);
+					var value = headerPair.substring(index + 2);
+
+					headers = A3(Dict.update, key, function(oldValue) {
+						if (oldValue.ctor === 'Just')
+						{
+							return Maybe.Just(value + ', ' + oldValue._0);
+						}
+						return Maybe.Just(value);
+					}, headers);
+				}
+			}
+
+			return headers;
+		}
+
+
+		function multipart(dataList)
+		{
+			var formData = new FormData();
+
+			while (dataList.ctor !== '[]')
+			{
+				var data = dataList._0;
+				if (data.ctor === 'StringData')
+				{
+					formData.append(data._0, data._1);
+				}
+				else
+				{
+					var fileName = data._1.ctor === 'Nothing'
+						? undefined
+						: data._1._0;
+					formData.append(data._0, data._2, fileName);
+				}
+				dataList = dataList._1;
+			}
+
+			return { ctor: 'BodyFormData', formData: formData };
+		}
+
+
+		function uriEncode(string)
+		{
+			return encodeURIComponent(string);
+		}
+
+		function uriDecode(string)
+		{
+			return decodeURIComponent(string);
+		}
+
+		return localRuntime.Native.Http.values = {
+			send: F2(send),
+			multipart: multipart,
+			uriEncode: uriEncode,
+			uriDecode: uriDecode
+		};
+	};
+
+	Elm.Http = Elm.Http || {};
+	Elm.Http.make = function (_elm) {
+	   "use strict";
+	   _elm.Http = _elm.Http || {};
+	   if (_elm.Http.values) return _elm.Http.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Dict = Elm.Dict.make(_elm),
+	   $Json$Decode = Elm.Json.Decode.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Native$Http = Elm.Native.Http.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm),
+	   $String = Elm.String.make(_elm),
+	   $Task = Elm.Task.make(_elm),
+	   $Time = Elm.Time.make(_elm);
+	   var _op = {};
+	   var send = $Native$Http.send;
+	   var BadResponse = F2(function (a,b) {
+	      return {ctor: "BadResponse",_0: a,_1: b};
+	   });
+	   var UnexpectedPayload = function (a) {
+	      return {ctor: "UnexpectedPayload",_0: a};
+	   };
+	   var handleResponse = F2(function (handle,response) {
+	      if (_U.cmp(200,
+	      response.status) < 1 && _U.cmp(response.status,300) < 0) {
+	            var _p0 = response.value;
+	            if (_p0.ctor === "Text") {
+	                  return handle(_p0._0);
+	               } else {
+	                  return $Task.fail(UnexpectedPayload("Response body is a blob, expecting a string."));
+	               }
+	         } else return $Task.fail(A2(BadResponse,
+	         response.status,
+	         response.statusText));
+	   });
+	   var NetworkError = {ctor: "NetworkError"};
+	   var Timeout = {ctor: "Timeout"};
+	   var promoteError = function (rawError) {
+	      var _p1 = rawError;
+	      if (_p1.ctor === "RawTimeout") {
+	            return Timeout;
+	         } else {
+	            return NetworkError;
+	         }
+	   };
+	   var fromJson = F2(function (decoder,response) {
+	      var decode = function (str) {
+	         var _p2 = A2($Json$Decode.decodeString,decoder,str);
+	         if (_p2.ctor === "Ok") {
+	               return $Task.succeed(_p2._0);
+	            } else {
+	               return $Task.fail(UnexpectedPayload(_p2._0));
+	            }
+	      };
+	      return A2($Task.andThen,
+	      A2($Task.mapError,promoteError,response),
+	      handleResponse(decode));
+	   });
+	   var RawNetworkError = {ctor: "RawNetworkError"};
+	   var RawTimeout = {ctor: "RawTimeout"};
+	   var Blob = function (a) {    return {ctor: "Blob",_0: a};};
+	   var Text = function (a) {    return {ctor: "Text",_0: a};};
+	   var Response = F5(function (a,b,c,d,e) {
+	      return {status: a,statusText: b,headers: c,url: d,value: e};
+	   });
+	   var defaultSettings = {timeout: 0
+	                         ,onStart: $Maybe.Nothing
+	                         ,onProgress: $Maybe.Nothing
+	                         ,desiredResponseType: $Maybe.Nothing
+	                         ,withCredentials: false};
+	   var post = F3(function (decoder,url,body) {
+	      var request = {verb: "POST"
+	                    ,headers: _U.list([])
+	                    ,url: url
+	                    ,body: body};
+	      return A2(fromJson,decoder,A2(send,defaultSettings,request));
+	   });
+	   var Settings = F5(function (a,b,c,d,e) {
+	      return {timeout: a
+	             ,onStart: b
+	             ,onProgress: c
+	             ,desiredResponseType: d
+	             ,withCredentials: e};
+	   });
+	   var multipart = $Native$Http.multipart;
+	   var FileData = F3(function (a,b,c) {
+	      return {ctor: "FileData",_0: a,_1: b,_2: c};
+	   });
+	   var BlobData = F3(function (a,b,c) {
+	      return {ctor: "BlobData",_0: a,_1: b,_2: c};
+	   });
+	   var blobData = BlobData;
+	   var StringData = F2(function (a,b) {
+	      return {ctor: "StringData",_0: a,_1: b};
+	   });
+	   var stringData = StringData;
+	   var BodyBlob = function (a) {
+	      return {ctor: "BodyBlob",_0: a};
+	   };
+	   var BodyFormData = {ctor: "BodyFormData"};
+	   var ArrayBuffer = {ctor: "ArrayBuffer"};
+	   var BodyString = function (a) {
+	      return {ctor: "BodyString",_0: a};
+	   };
+	   var string = BodyString;
+	   var Empty = {ctor: "Empty"};
+	   var empty = Empty;
+	   var getString = function (url) {
+	      var request = {verb: "GET"
+	                    ,headers: _U.list([])
+	                    ,url: url
+	                    ,body: empty};
+	      return A2($Task.andThen,
+	      A2($Task.mapError,
+	      promoteError,
+	      A2(send,defaultSettings,request)),
+	      handleResponse($Task.succeed));
+	   };
+	   var get = F2(function (decoder,url) {
+	      var request = {verb: "GET"
+	                    ,headers: _U.list([])
+	                    ,url: url
+	                    ,body: empty};
+	      return A2(fromJson,decoder,A2(send,defaultSettings,request));
+	   });
+	   var Request = F4(function (a,b,c,d) {
+	      return {verb: a,headers: b,url: c,body: d};
+	   });
+	   var uriDecode = $Native$Http.uriDecode;
+	   var uriEncode = $Native$Http.uriEncode;
+	   var queryEscape = function (string) {
+	      return A2($String.join,
+	      "+",
+	      A2($String.split,"%20",uriEncode(string)));
+	   };
+	   var queryPair = function (_p3) {
+	      var _p4 = _p3;
+	      return A2($Basics._op["++"],
+	      queryEscape(_p4._0),
+	      A2($Basics._op["++"],"=",queryEscape(_p4._1)));
+	   };
+	   var url = F2(function (baseUrl,args) {
+	      var _p5 = args;
+	      if (_p5.ctor === "[]") {
+	            return baseUrl;
+	         } else {
+	            return A2($Basics._op["++"],
+	            baseUrl,
+	            A2($Basics._op["++"],
+	            "?",
+	            A2($String.join,"&",A2($List.map,queryPair,args))));
+	         }
+	   });
+	   var TODO_implement_file_in_another_library = {ctor: "TODO_implement_file_in_another_library"};
+	   var TODO_implement_blob_in_another_library = {ctor: "TODO_implement_blob_in_another_library"};
+	   return _elm.Http.values = {_op: _op
+	                             ,getString: getString
+	                             ,get: get
+	                             ,post: post
+	                             ,send: send
+	                             ,url: url
+	                             ,uriEncode: uriEncode
+	                             ,uriDecode: uriDecode
+	                             ,empty: empty
+	                             ,string: string
+	                             ,multipart: multipart
+	                             ,stringData: stringData
+	                             ,defaultSettings: defaultSettings
+	                             ,fromJson: fromJson
+	                             ,Request: Request
+	                             ,Settings: Settings
+	                             ,Response: Response
+	                             ,Text: Text
+	                             ,Blob: Blob
+	                             ,Timeout: Timeout
+	                             ,NetworkError: NetworkError
+	                             ,UnexpectedPayload: UnexpectedPayload
+	                             ,BadResponse: BadResponse
+	                             ,RawTimeout: RawTimeout
+	                             ,RawNetworkError: RawNetworkError};
+	};
 	Elm.StartApp = Elm.StartApp || {};
 	Elm.StartApp.make = function (_elm) {
 	   "use strict";
@@ -12232,6 +12745,319 @@
 	                                 ,Config: Config
 	                                 ,App: App};
 	};
+	Elm.Hop = Elm.Hop || {};
+	Elm.Hop.Types = Elm.Hop.Types || {};
+	Elm.Hop.Types.make = function (_elm) {
+	   "use strict";
+	   _elm.Hop = _elm.Hop || {};
+	   _elm.Hop.Types = _elm.Hop.Types || {};
+	   if (_elm.Hop.Types.values) return _elm.Hop.Types.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Dict = Elm.Dict.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm),
+	   $Task = Elm.Task.make(_elm);
+	   var _op = {};
+	   var newUrl = {query: $Dict.empty,path: _U.list([])};
+	   var newPayload = {params: $Dict.empty,url: newUrl};
+	   var Router = F3(function (a,b,c) {
+	      return {signal: a,payload: b,run: c};
+	   });
+	   var Config = F2(function (a,b) {
+	      return {notFoundAction: a,routes: b};
+	   });
+	   var Payload = F2(function (a,b) {
+	      return {params: a,url: b};
+	   });
+	   var Url = F2(function (a,b) {    return {path: a,query: b};});
+	   return _elm.Hop.Types.values = {_op: _op
+	                                  ,Url: Url
+	                                  ,Payload: Payload
+	                                  ,Config: Config
+	                                  ,Router: Router
+	                                  ,newUrl: newUrl
+	                                  ,newPayload: newPayload};
+	};
+	Elm.Hop = Elm.Hop || {};
+	Elm.Hop.Url = Elm.Hop.Url || {};
+	Elm.Hop.Url.make = function (_elm) {
+	   "use strict";
+	   _elm.Hop = _elm.Hop || {};
+	   _elm.Hop.Url = _elm.Hop.Url || {};
+	   if (_elm.Hop.Url.values) return _elm.Hop.Url.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Dict = Elm.Dict.make(_elm),
+	   $Hop$Types = Elm.Hop.Types.make(_elm),
+	   $Http = Elm.Http.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm),
+	   $String = Elm.String.make(_elm);
+	   var _op = {};
+	   var clearQuery = function (url) {
+	      return _U.update(url,{query: $Dict.empty});
+	   };
+	   var removeQuery = F2(function (key,url) {
+	      var updatedQuery = A2($Dict.remove,key,url.query);
+	      return _U.update(url,{query: updatedQuery});
+	   });
+	   var setQuery = F2(function (query,url) {
+	      return _U.update(url,{query: query});
+	   });
+	   var addQuery = F2(function (query,url) {
+	      var updatedQuery = A2($Dict.union,query,url.query);
+	      return _U.update(url,{query: updatedQuery});
+	   });
+	   var queryKVtoTuple = function (kv) {
+	      var splitted = A2($String.split,"=",kv);
+	      var first = A2($Maybe.withDefault,"",$List.head(splitted));
+	      var firstDecoded = $Http.uriDecode(first);
+	      var second = A2($Maybe.withDefault,
+	      "",
+	      $List.head(A2($List.drop,1,splitted)));
+	      var secondDecoded = $Http.uriDecode(second);
+	      return {ctor: "_Tuple2",_0: firstDecoded,_1: secondDecoded};
+	   };
+	   var extractQuery = function (route) {
+	      return A2($Maybe.withDefault,
+	      "",
+	      $List.head(A2($List.drop,1,A2($String.split,"?",route))));
+	   };
+	   var parseQuery = function (route) {
+	      return $Dict.fromList(A2($List.map,
+	      queryKVtoTuple,
+	      A2($List.filter,
+	      function (_p0) {
+	         return $Basics.not($String.isEmpty(_p0));
+	      },
+	      A2($String.split,"&",extractQuery(route)))));
+	   };
+	   var extractPath = function (route) {
+	      return A2($Maybe.withDefault,
+	      "",
+	      $List.head(A2($String.split,
+	      "?",
+	      A2($Maybe.withDefault,
+	      "",
+	      $List.head($List.reverse(A2($String.split,"#",route)))))));
+	   };
+	   var parsePath = function (route) {
+	      return A2($List.filter,
+	      function (_p1) {
+	         return $Basics.not($String.isEmpty(_p1));
+	      },
+	      A2($String.split,"/",extractPath(route)));
+	   };
+	   var parse = function (route) {
+	      return {path: parsePath(route),query: parseQuery(route)};
+	   };
+	   var urlFromUser = function (route) {
+	      var normalized = A2($String.startsWith,
+	      "#",
+	      route) ? route : A2($Basics._op["++"],"#",route);
+	      return parse(normalized);
+	   };
+	   var pathFromUrl = function (url) {
+	      return $List.isEmpty(url.path) ? "" : A2($String.join,
+	      "/",
+	      url.path);
+	   };
+	   var queryFromUrl = function (url) {
+	      return $Dict.isEmpty(url.query) ? "" : A2($String.append,
+	      "?",
+	      A2($String.join,
+	      "&",
+	      A2($List.map,
+	      function (_p2) {
+	         var _p3 = _p2;
+	         return A2($Basics._op["++"],
+	         _p3._0,
+	         A2($Basics._op["++"],"=",_p3._1));
+	      },
+	      $Dict.toList(url.query))));
+	   };
+	   var routeFromUrl = function (url) {
+	      return A2($Basics._op["++"],
+	      "#/",
+	      A2($Basics._op["++"],pathFromUrl(url),queryFromUrl(url)));
+	   };
+	   return _elm.Hop.Url.values = {_op: _op
+	                                ,routeFromUrl: routeFromUrl
+	                                ,queryFromUrl: queryFromUrl
+	                                ,pathFromUrl: pathFromUrl
+	                                ,parse: parse
+	                                ,extractPath: extractPath
+	                                ,parsePath: parsePath
+	                                ,extractQuery: extractQuery
+	                                ,parseQuery: parseQuery
+	                                ,queryKVtoTuple: queryKVtoTuple
+	                                ,urlFromUser: urlFromUser
+	                                ,addQuery: addQuery
+	                                ,setQuery: setQuery
+	                                ,removeQuery: removeQuery
+	                                ,clearQuery: clearQuery};
+	};
+	Elm.Hop = Elm.Hop || {};
+	Elm.Hop.Resolver = Elm.Hop.Resolver || {};
+	Elm.Hop.Resolver.make = function (_elm) {
+	   "use strict";
+	   _elm.Hop = _elm.Hop || {};
+	   _elm.Hop.Resolver = _elm.Hop.Resolver || {};
+	   if (_elm.Hop.Resolver.values) return _elm.Hop.Resolver.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Dict = Elm.Dict.make(_elm),
+	   $Hop$Types = Elm.Hop.Types.make(_elm),
+	   $Hop$Url = Elm.Hop.Url.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm),
+	   $String = Elm.String.make(_elm);
+	   var _op = {};
+	   var isRouteHashPlaceholder = function (hash) {
+	      return A2($String.startsWith,":",hash);
+	   };
+	   var isRouteFragmentMatch = function (_p0) {
+	      var _p1 = _p0;
+	      var _p2 = _p1._1;
+	      return isRouteHashPlaceholder(_p2) ? true : _U.eq(_p2,_p1._0);
+	   };
+	   var parseRouteFragment = function (route) {
+	      var notEmpty = function (x) {
+	         return $Basics.not($String.isEmpty(x));
+	      };
+	      return A2($List.filter,notEmpty,A2($String.split,"/",route));
+	   };
+	   var isRouteMatch = F2(function (url,routeDef) {
+	      var definitionFragmentList = parseRouteFragment($Basics.fst(routeDef));
+	      var definitionFragmentLen = $List.length(definitionFragmentList);
+	      var currentFragmentList = url.path;
+	      var currentLen = $List.length(currentFragmentList);
+	      var combinedCurrentAndDefinition = A3($List.map2,
+	      F2(function (v0,v1) {
+	         return {ctor: "_Tuple2",_0: v0,_1: v1};
+	      }),
+	      currentFragmentList,
+	      definitionFragmentList);
+	      return _U.eq(currentLen,definitionFragmentLen) ? A2($List.all,
+	      isRouteFragmentMatch,
+	      combinedCurrentAndDefinition) : false;
+	   });
+	   var matchedRoute = F2(function (routes,url) {
+	      return $List.head(A2($List.filter,isRouteMatch(url),routes));
+	   });
+	   var routeDefintionForUrl = F2(function (config,url) {
+	      return A2($Maybe.withDefault,
+	      {ctor: "_Tuple2",_0: "",_1: config.notFoundAction},
+	      A2(matchedRoute,config.routes,url));
+	   });
+	   var paramsForRoute = F2(function (routeDefinition,url) {
+	      var maybeParam = F2(function (routeFragment,urlFragment) {
+	         return isRouteHashPlaceholder(routeFragment) ? {ctor: "_Tuple2"
+	                                                        ,_0: A2($String.dropLeft,1,routeFragment)
+	                                                        ,_1: urlFragment} : {ctor: "_Tuple2",_0: "",_1: ""};
+	      });
+	      var routeFragments = parseRouteFragment(routeDefinition);
+	      var params = A3($List.map2,maybeParam,routeFragments,url.path);
+	      var relevantParams = A2($List.filter,
+	      function (_p3) {
+	         var _p4 = _p3;
+	         return $Basics.not($String.isEmpty(_p4._0));
+	      },
+	      params);
+	      return A2($Dict.union,url.query,$Dict.fromList(relevantParams));
+	   });
+	   var userActionFromUrlString = F2(function (config,urlString) {
+	      var url = $Hop$Url.parse(urlString);
+	      var _p5 = A2(routeDefintionForUrl,config,url);
+	      var route = _p5._0;
+	      var userAction = _p5._1;
+	      var params = A2(paramsForRoute,route,url);
+	      var payload = {params: params,url: url};
+	      return userAction(payload);
+	   });
+	   return _elm.Hop.Resolver.values = {_op: _op
+	                                     ,userActionFromUrlString: userActionFromUrlString
+	                                     ,paramsForRoute: paramsForRoute
+	                                     ,parseRouteFragment: parseRouteFragment
+	                                     ,routeDefintionForUrl: routeDefintionForUrl
+	                                     ,matchedRoute: matchedRoute
+	                                     ,isRouteMatch: isRouteMatch
+	                                     ,isRouteFragmentMatch: isRouteFragmentMatch
+	                                     ,isRouteHashPlaceholder: isRouteHashPlaceholder};
+	};
+	Elm.Hop = Elm.Hop || {};
+	Elm.Hop.make = function (_elm) {
+	   "use strict";
+	   _elm.Hop = _elm.Hop || {};
+	   if (_elm.Hop.values) return _elm.Hop.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Effects = Elm.Effects.make(_elm),
+	   $History = Elm.History.make(_elm),
+	   $Hop$Resolver = Elm.Hop.Resolver.make(_elm),
+	   $Hop$Types = Elm.Hop.Types.make(_elm),
+	   $Hop$Url = Elm.Hop.Url.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm),
+	   $Task = Elm.Task.make(_elm);
+	   var _op = {};
+	   var locationChangeSignal = function (config) {
+	      return A2($Signal.map,
+	      $Hop$Resolver.userActionFromUrlString(config),
+	      $History.hash);
+	   };
+	   var $new = function (config) {
+	      return {signal: locationChangeSignal(config)
+	             ,payload: $Hop$Types.newPayload
+	             ,run: $History.setPath("")};
+	   };
+	   var GoToRouteResult = function (a) {
+	      return {ctor: "GoToRouteResult",_0: a};
+	   };
+	   var navigateToUrl = function (url) {
+	      return $Effects.task(A2($Task.map,
+	      GoToRouteResult,
+	      $Task.toResult($History.setPath($Hop$Url.routeFromUrl(url)))));
+	   };
+	   var navigateTo = function (route) {
+	      return navigateToUrl($Hop$Url.urlFromUser(route));
+	   };
+	   var addQuery = F2(function (query,currentUrl) {
+	      return navigateToUrl(A2($Hop$Url.addQuery,query,currentUrl));
+	   });
+	   var setQuery = F2(function (query,currentUrl) {
+	      return navigateToUrl(A2($Hop$Url.setQuery,query,currentUrl));
+	   });
+	   var removeQuery = F2(function (key,currentUrl) {
+	      return navigateToUrl(A2($Hop$Url.removeQuery,
+	      key,
+	      currentUrl));
+	   });
+	   var clearQuery = function (currentUrl) {
+	      return navigateToUrl($Hop$Url.clearQuery(currentUrl));
+	   };
+	   var NoOp = {ctor: "NoOp"};
+	   return _elm.Hop.values = {_op: _op
+	                            ,$new: $new
+	                            ,navigateTo: navigateTo
+	                            ,addQuery: addQuery
+	                            ,setQuery: setQuery
+	                            ,removeQuery: removeQuery
+	                            ,clearQuery: clearQuery};
+	};
 	Elm.Players = Elm.Players || {};
 	Elm.Players.Actions = Elm.Players.Actions || {};
 	Elm.Players.Actions.make = function (_elm) {
@@ -12251,6 +13077,84 @@
 	   var NoOp = {ctor: "NoOp"};
 	   return _elm.Players.Actions.values = {_op: _op,NoOp: NoOp};
 	};
+	Elm.Routing = Elm.Routing || {};
+	Elm.Routing.make = function (_elm) {
+	   "use strict";
+	   _elm.Routing = _elm.Routing || {};
+	   if (_elm.Routing.values) return _elm.Routing.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Effects = Elm.Effects.make(_elm),
+	   $Hop = Elm.Hop.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm);
+	   var _op = {};
+	   var Model = F2(function (a,b) {
+	      return {routerPayload: a,view: b};
+	   });
+	   var NotFoundView = {ctor: "NotFoundView"};
+	   var PlayerEditView = {ctor: "PlayerEditView"};
+	   var PlayersView = {ctor: "PlayersView"};
+	   var NoOp = {ctor: "NoOp"};
+	   var NavigateTo = function (a) {
+	      return {ctor: "NavigateTo",_0: a};
+	   };
+	   var ShowNotFound = function (a) {
+	      return {ctor: "ShowNotFound",_0: a};
+	   };
+	   var ShowPlayerEdit = function (a) {
+	      return {ctor: "ShowPlayerEdit",_0: a};
+	   };
+	   var ShowPlayers = function (a) {
+	      return {ctor: "ShowPlayers",_0: a};
+	   };
+	   var routes = _U.list([{ctor: "_Tuple2",_0: "/",_1: ShowPlayers}
+	                        ,{ctor: "_Tuple2",_0: "/players",_1: ShowPlayers}
+	                        ,{ctor: "_Tuple2",_0: "/players/:id/edit",_1: ShowPlayerEdit}]);
+	   var router = $Hop.$new({routes: routes
+	                          ,notFoundAction: ShowNotFound});
+	   var initialModel = {routerPayload: router.payload
+	                      ,view: PlayersView};
+	   var HopAction = function (a) {
+	      return {ctor: "HopAction",_0: a};
+	   };
+	   var update = F2(function (action,model) {
+	      var _p0 = action;
+	      switch (_p0.ctor)
+	      {case "NavigateTo": return {ctor: "_Tuple2"
+	                                 ,_0: model
+	                                 ,_1: A2($Effects.map,HopAction,$Hop.navigateTo(_p0._0))};
+	         case "ShowPlayers": return {ctor: "_Tuple2"
+	                                    ,_0: _U.update(model,{view: PlayersView,routerPayload: _p0._0})
+	                                    ,_1: $Effects.none};
+	         case "ShowPlayerEdit": return {ctor: "_Tuple2"
+	                                       ,_0: _U.update(model,
+	                                       {view: PlayerEditView,routerPayload: _p0._0})
+	                                       ,_1: $Effects.none};
+	         case "ShowNotFound": return {ctor: "_Tuple2"
+	                                     ,_0: _U.update(model,{view: NotFoundView,routerPayload: _p0._0})
+	                                     ,_1: $Effects.none};
+	         default: return {ctor: "_Tuple2",_0: model,_1: $Effects.none};}
+	   });
+	   return _elm.Routing.values = {_op: _op
+	                                ,HopAction: HopAction
+	                                ,ShowPlayers: ShowPlayers
+	                                ,ShowPlayerEdit: ShowPlayerEdit
+	                                ,ShowNotFound: ShowNotFound
+	                                ,NavigateTo: NavigateTo
+	                                ,NoOp: NoOp
+	                                ,PlayersView: PlayersView
+	                                ,PlayerEditView: PlayerEditView
+	                                ,NotFoundView: NotFoundView
+	                                ,Model: Model
+	                                ,initialModel: initialModel
+	                                ,update: update
+	                                ,routes: routes
+	                                ,router: router};
+	};
 	Elm.Actions = Elm.Actions || {};
 	Elm.Actions.make = function (_elm) {
 	   "use strict";
@@ -12263,14 +13167,19 @@
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Players$Actions = Elm.Players.Actions.make(_elm),
 	   $Result = Elm.Result.make(_elm),
+	   $Routing = Elm.Routing.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
 	   var PlayersAction = function (a) {
 	      return {ctor: "PlayersAction",_0: a};
 	   };
+	   var RoutingAction = function (a) {
+	      return {ctor: "RoutingAction",_0: a};
+	   };
 	   var NoOp = {ctor: "NoOp"};
 	   return _elm.Actions.values = {_op: _op
 	                                ,NoOp: NoOp
+	                                ,RoutingAction: RoutingAction
 	                                ,PlayersAction: PlayersAction};
 	};
 	Elm.Players = Elm.Players || {};
@@ -12309,13 +13218,17 @@
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Players$Models = Elm.Players.Models.make(_elm),
 	   $Result = Elm.Result.make(_elm),
+	   $Routing = Elm.Routing.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
 	   var initialModel = {players: _U.list([A3($Players$Models.Player,
-	   1,
-	   "Sam",
-	   1)])};
-	   var AppModel = function (a) {    return {players: a};};
+	                      1,
+	                      "Sam",
+	                      1)])
+	                      ,routing: $Routing.initialModel};
+	   var AppModel = F2(function (a,b) {
+	      return {players: a,routing: b};
+	   });
 	   return _elm.Models.values = {_op: _op
 	                               ,AppModel: AppModel
 	                               ,initialModel: initialModel};
@@ -12363,21 +13276,29 @@
 	   $Models = Elm.Models.make(_elm),
 	   $Players$Update = Elm.Players.Update.make(_elm),
 	   $Result = Elm.Result.make(_elm),
+	   $Routing = Elm.Routing.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
 	   var update = F2(function (action,model) {
-	      var _p0 = action;
-	      if (_p0.ctor === "PlayersAction") {
-	            var updateModel = {players: model.players};
-	            var _p1 = A2($Players$Update.update,_p0._0,updateModel);
-	            var updatedPlayers = _p1._0;
-	            var fx = _p1._1;
-	            return {ctor: "_Tuple2"
-	                   ,_0: _U.update(model,{players: updatedPlayers})
-	                   ,_1: A2($Effects.map,$Actions.PlayersAction,fx)};
-	         } else {
-	            return {ctor: "_Tuple2",_0: model,_1: $Effects.none};
-	         }
+	      var _p0 = A2($Debug.log,"action",action);
+	      switch (_p0.ctor)
+	      {case "RoutingAction": var _p1 = A2($Routing.update,
+	           _p0._0,
+	           model.routing);
+	           var updatedRouting = _p1._0;
+	           var fx = _p1._1;
+	           return {ctor: "_Tuple2"
+	                  ,_0: _U.update(model,{routing: updatedRouting})
+	                  ,_1: A2($Effects.map,$Actions.RoutingAction,fx)};
+	         case "PlayersAction":
+	         var updateModel = {players: model.players};
+	           var _p2 = A2($Players$Update.update,_p0._0,updateModel);
+	           var updatedPlayers = _p2._0;
+	           var fx = _p2._1;
+	           return {ctor: "_Tuple2"
+	                  ,_0: _U.update(model,{players: updatedPlayers})
+	                  ,_1: A2($Effects.map,$Actions.PlayersAction,fx)};
+	         default: return {ctor: "_Tuple2",_0: model,_1: $Effects.none};}
 	   });
 	   return _elm.Update.values = {_op: _op,update: update};
 	};
