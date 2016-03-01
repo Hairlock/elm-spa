@@ -11736,6 +11736,437 @@
 	                             ,menuitem: menuitem
 	                             ,menu: menu};
 	};
+	Elm.Html = Elm.Html || {};
+	Elm.Html.Attributes = Elm.Html.Attributes || {};
+	Elm.Html.Attributes.make = function (_elm) {
+	   "use strict";
+	   _elm.Html = _elm.Html || {};
+	   _elm.Html.Attributes = _elm.Html.Attributes || {};
+	   if (_elm.Html.Attributes.values)
+	   return _elm.Html.Attributes.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Html = Elm.Html.make(_elm),
+	   $Json$Encode = Elm.Json.Encode.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm),
+	   $String = Elm.String.make(_elm),
+	   $VirtualDom = Elm.VirtualDom.make(_elm);
+	   var _op = {};
+	   var attribute = $VirtualDom.attribute;
+	   var contextmenu = function (value) {
+	      return A2(attribute,"contextmenu",value);
+	   };
+	   var property = $VirtualDom.property;
+	   var stringProperty = F2(function (name,string) {
+	      return A2(property,name,$Json$Encode.string(string));
+	   });
+	   var $class = function (name) {
+	      return A2(stringProperty,"className",name);
+	   };
+	   var id = function (name) {
+	      return A2(stringProperty,"id",name);
+	   };
+	   var title = function (name) {
+	      return A2(stringProperty,"title",name);
+	   };
+	   var accesskey = function ($char) {
+	      return A2(stringProperty,
+	      "accessKey",
+	      $String.fromChar($char));
+	   };
+	   var dir = function (value) {
+	      return A2(stringProperty,"dir",value);
+	   };
+	   var draggable = function (value) {
+	      return A2(stringProperty,"draggable",value);
+	   };
+	   var dropzone = function (value) {
+	      return A2(stringProperty,"dropzone",value);
+	   };
+	   var itemprop = function (value) {
+	      return A2(stringProperty,"itemprop",value);
+	   };
+	   var lang = function (value) {
+	      return A2(stringProperty,"lang",value);
+	   };
+	   var tabindex = function (n) {
+	      return A2(stringProperty,"tabIndex",$Basics.toString(n));
+	   };
+	   var charset = function (value) {
+	      return A2(stringProperty,"charset",value);
+	   };
+	   var content = function (value) {
+	      return A2(stringProperty,"content",value);
+	   };
+	   var httpEquiv = function (value) {
+	      return A2(stringProperty,"httpEquiv",value);
+	   };
+	   var language = function (value) {
+	      return A2(stringProperty,"language",value);
+	   };
+	   var src = function (value) {
+	      return A2(stringProperty,"src",value);
+	   };
+	   var height = function (value) {
+	      return A2(stringProperty,"height",$Basics.toString(value));
+	   };
+	   var width = function (value) {
+	      return A2(stringProperty,"width",$Basics.toString(value));
+	   };
+	   var alt = function (value) {
+	      return A2(stringProperty,"alt",value);
+	   };
+	   var preload = function (value) {
+	      return A2(stringProperty,"preload",value);
+	   };
+	   var poster = function (value) {
+	      return A2(stringProperty,"poster",value);
+	   };
+	   var kind = function (value) {
+	      return A2(stringProperty,"kind",value);
+	   };
+	   var srclang = function (value) {
+	      return A2(stringProperty,"srclang",value);
+	   };
+	   var sandbox = function (value) {
+	      return A2(stringProperty,"sandbox",value);
+	   };
+	   var srcdoc = function (value) {
+	      return A2(stringProperty,"srcdoc",value);
+	   };
+	   var type$ = function (value) {
+	      return A2(stringProperty,"type",value);
+	   };
+	   var value = function (value) {
+	      return A2(stringProperty,"value",value);
+	   };
+	   var placeholder = function (value) {
+	      return A2(stringProperty,"placeholder",value);
+	   };
+	   var accept = function (value) {
+	      return A2(stringProperty,"accept",value);
+	   };
+	   var acceptCharset = function (value) {
+	      return A2(stringProperty,"acceptCharset",value);
+	   };
+	   var action = function (value) {
+	      return A2(stringProperty,"action",value);
+	   };
+	   var autocomplete = function (bool) {
+	      return A2(stringProperty,"autocomplete",bool ? "on" : "off");
+	   };
+	   var autosave = function (value) {
+	      return A2(stringProperty,"autosave",value);
+	   };
+	   var enctype = function (value) {
+	      return A2(stringProperty,"enctype",value);
+	   };
+	   var formaction = function (value) {
+	      return A2(stringProperty,"formAction",value);
+	   };
+	   var list = function (value) {
+	      return A2(stringProperty,"list",value);
+	   };
+	   var minlength = function (n) {
+	      return A2(stringProperty,"minLength",$Basics.toString(n));
+	   };
+	   var maxlength = function (n) {
+	      return A2(stringProperty,"maxLength",$Basics.toString(n));
+	   };
+	   var method = function (value) {
+	      return A2(stringProperty,"method",value);
+	   };
+	   var name = function (value) {
+	      return A2(stringProperty,"name",value);
+	   };
+	   var pattern = function (value) {
+	      return A2(stringProperty,"pattern",value);
+	   };
+	   var size = function (n) {
+	      return A2(stringProperty,"size",$Basics.toString(n));
+	   };
+	   var $for = function (value) {
+	      return A2(stringProperty,"htmlFor",value);
+	   };
+	   var form = function (value) {
+	      return A2(stringProperty,"form",value);
+	   };
+	   var max = function (value) {
+	      return A2(stringProperty,"max",value);
+	   };
+	   var min = function (value) {
+	      return A2(stringProperty,"min",value);
+	   };
+	   var step = function (n) {
+	      return A2(stringProperty,"step",n);
+	   };
+	   var cols = function (n) {
+	      return A2(stringProperty,"cols",$Basics.toString(n));
+	   };
+	   var rows = function (n) {
+	      return A2(stringProperty,"rows",$Basics.toString(n));
+	   };
+	   var wrap = function (value) {
+	      return A2(stringProperty,"wrap",value);
+	   };
+	   var usemap = function (value) {
+	      return A2(stringProperty,"useMap",value);
+	   };
+	   var shape = function (value) {
+	      return A2(stringProperty,"shape",value);
+	   };
+	   var coords = function (value) {
+	      return A2(stringProperty,"coords",value);
+	   };
+	   var challenge = function (value) {
+	      return A2(stringProperty,"challenge",value);
+	   };
+	   var keytype = function (value) {
+	      return A2(stringProperty,"keytype",value);
+	   };
+	   var align = function (value) {
+	      return A2(stringProperty,"align",value);
+	   };
+	   var cite = function (value) {
+	      return A2(stringProperty,"cite",value);
+	   };
+	   var href = function (value) {
+	      return A2(stringProperty,"href",value);
+	   };
+	   var target = function (value) {
+	      return A2(stringProperty,"target",value);
+	   };
+	   var downloadAs = function (value) {
+	      return A2(stringProperty,"download",value);
+	   };
+	   var hreflang = function (value) {
+	      return A2(stringProperty,"hreflang",value);
+	   };
+	   var media = function (value) {
+	      return A2(stringProperty,"media",value);
+	   };
+	   var ping = function (value) {
+	      return A2(stringProperty,"ping",value);
+	   };
+	   var rel = function (value) {
+	      return A2(stringProperty,"rel",value);
+	   };
+	   var datetime = function (value) {
+	      return A2(stringProperty,"datetime",value);
+	   };
+	   var pubdate = function (value) {
+	      return A2(stringProperty,"pubdate",value);
+	   };
+	   var start = function (n) {
+	      return A2(stringProperty,"start",$Basics.toString(n));
+	   };
+	   var colspan = function (n) {
+	      return A2(stringProperty,"colSpan",$Basics.toString(n));
+	   };
+	   var headers = function (value) {
+	      return A2(stringProperty,"headers",value);
+	   };
+	   var rowspan = function (n) {
+	      return A2(stringProperty,"rowSpan",$Basics.toString(n));
+	   };
+	   var scope = function (value) {
+	      return A2(stringProperty,"scope",value);
+	   };
+	   var manifest = function (value) {
+	      return A2(stringProperty,"manifest",value);
+	   };
+	   var boolProperty = F2(function (name,bool) {
+	      return A2(property,name,$Json$Encode.bool(bool));
+	   });
+	   var hidden = function (bool) {
+	      return A2(boolProperty,"hidden",bool);
+	   };
+	   var contenteditable = function (bool) {
+	      return A2(boolProperty,"contentEditable",bool);
+	   };
+	   var spellcheck = function (bool) {
+	      return A2(boolProperty,"spellcheck",bool);
+	   };
+	   var async = function (bool) {
+	      return A2(boolProperty,"async",bool);
+	   };
+	   var defer = function (bool) {
+	      return A2(boolProperty,"defer",bool);
+	   };
+	   var scoped = function (bool) {
+	      return A2(boolProperty,"scoped",bool);
+	   };
+	   var autoplay = function (bool) {
+	      return A2(boolProperty,"autoplay",bool);
+	   };
+	   var controls = function (bool) {
+	      return A2(boolProperty,"controls",bool);
+	   };
+	   var loop = function (bool) {
+	      return A2(boolProperty,"loop",bool);
+	   };
+	   var $default = function (bool) {
+	      return A2(boolProperty,"default",bool);
+	   };
+	   var seamless = function (bool) {
+	      return A2(boolProperty,"seamless",bool);
+	   };
+	   var checked = function (bool) {
+	      return A2(boolProperty,"checked",bool);
+	   };
+	   var selected = function (bool) {
+	      return A2(boolProperty,"selected",bool);
+	   };
+	   var autofocus = function (bool) {
+	      return A2(boolProperty,"autofocus",bool);
+	   };
+	   var disabled = function (bool) {
+	      return A2(boolProperty,"disabled",bool);
+	   };
+	   var multiple = function (bool) {
+	      return A2(boolProperty,"multiple",bool);
+	   };
+	   var novalidate = function (bool) {
+	      return A2(boolProperty,"noValidate",bool);
+	   };
+	   var readonly = function (bool) {
+	      return A2(boolProperty,"readOnly",bool);
+	   };
+	   var required = function (bool) {
+	      return A2(boolProperty,"required",bool);
+	   };
+	   var ismap = function (value) {
+	      return A2(boolProperty,"isMap",value);
+	   };
+	   var download = function (bool) {
+	      return A2(boolProperty,"download",bool);
+	   };
+	   var reversed = function (bool) {
+	      return A2(boolProperty,"reversed",bool);
+	   };
+	   var classList = function (list) {
+	      return $class(A2($String.join,
+	      " ",
+	      A2($List.map,$Basics.fst,A2($List.filter,$Basics.snd,list))));
+	   };
+	   var style = function (props) {
+	      return A2(property,
+	      "style",
+	      $Json$Encode.object(A2($List.map,
+	      function (_p0) {
+	         var _p1 = _p0;
+	         return {ctor: "_Tuple2"
+	                ,_0: _p1._0
+	                ,_1: $Json$Encode.string(_p1._1)};
+	      },
+	      props)));
+	   };
+	   var key = function (k) {    return A2(stringProperty,"key",k);};
+	   return _elm.Html.Attributes.values = {_op: _op
+	                                        ,key: key
+	                                        ,style: style
+	                                        ,$class: $class
+	                                        ,classList: classList
+	                                        ,id: id
+	                                        ,title: title
+	                                        ,hidden: hidden
+	                                        ,type$: type$
+	                                        ,value: value
+	                                        ,checked: checked
+	                                        ,placeholder: placeholder
+	                                        ,selected: selected
+	                                        ,accept: accept
+	                                        ,acceptCharset: acceptCharset
+	                                        ,action: action
+	                                        ,autocomplete: autocomplete
+	                                        ,autofocus: autofocus
+	                                        ,autosave: autosave
+	                                        ,disabled: disabled
+	                                        ,enctype: enctype
+	                                        ,formaction: formaction
+	                                        ,list: list
+	                                        ,maxlength: maxlength
+	                                        ,minlength: minlength
+	                                        ,method: method
+	                                        ,multiple: multiple
+	                                        ,name: name
+	                                        ,novalidate: novalidate
+	                                        ,pattern: pattern
+	                                        ,readonly: readonly
+	                                        ,required: required
+	                                        ,size: size
+	                                        ,$for: $for
+	                                        ,form: form
+	                                        ,max: max
+	                                        ,min: min
+	                                        ,step: step
+	                                        ,cols: cols
+	                                        ,rows: rows
+	                                        ,wrap: wrap
+	                                        ,href: href
+	                                        ,target: target
+	                                        ,download: download
+	                                        ,downloadAs: downloadAs
+	                                        ,hreflang: hreflang
+	                                        ,media: media
+	                                        ,ping: ping
+	                                        ,rel: rel
+	                                        ,ismap: ismap
+	                                        ,usemap: usemap
+	                                        ,shape: shape
+	                                        ,coords: coords
+	                                        ,src: src
+	                                        ,height: height
+	                                        ,width: width
+	                                        ,alt: alt
+	                                        ,autoplay: autoplay
+	                                        ,controls: controls
+	                                        ,loop: loop
+	                                        ,preload: preload
+	                                        ,poster: poster
+	                                        ,$default: $default
+	                                        ,kind: kind
+	                                        ,srclang: srclang
+	                                        ,sandbox: sandbox
+	                                        ,seamless: seamless
+	                                        ,srcdoc: srcdoc
+	                                        ,reversed: reversed
+	                                        ,start: start
+	                                        ,align: align
+	                                        ,colspan: colspan
+	                                        ,rowspan: rowspan
+	                                        ,headers: headers
+	                                        ,scope: scope
+	                                        ,async: async
+	                                        ,charset: charset
+	                                        ,content: content
+	                                        ,defer: defer
+	                                        ,httpEquiv: httpEquiv
+	                                        ,language: language
+	                                        ,scoped: scoped
+	                                        ,accesskey: accesskey
+	                                        ,contenteditable: contenteditable
+	                                        ,contextmenu: contextmenu
+	                                        ,dir: dir
+	                                        ,draggable: draggable
+	                                        ,dropzone: dropzone
+	                                        ,itemprop: itemprop
+	                                        ,lang: lang
+	                                        ,spellcheck: spellcheck
+	                                        ,tabindex: tabindex
+	                                        ,challenge: challenge
+	                                        ,keytype: keytype
+	                                        ,cite: cite
+	                                        ,datetime: datetime
+	                                        ,pubdate: pubdate
+	                                        ,manifest: manifest
+	                                        ,property: property
+	                                        ,attribute: attribute};
+	};
 	Elm.StartApp = Elm.StartApp || {};
 	Elm.StartApp.make = function (_elm) {
 	   "use strict";
@@ -11801,6 +12232,25 @@
 	                                 ,Config: Config
 	                                 ,App: App};
 	};
+	Elm.Players = Elm.Players || {};
+	Elm.Players.Actions = Elm.Players.Actions || {};
+	Elm.Players.Actions.make = function (_elm) {
+	   "use strict";
+	   _elm.Players = _elm.Players || {};
+	   _elm.Players.Actions = _elm.Players.Actions || {};
+	   if (_elm.Players.Actions.values)
+	   return _elm.Players.Actions.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm);
+	   var _op = {};
+	   var NoOp = {ctor: "NoOp"};
+	   return _elm.Players.Actions.values = {_op: _op,NoOp: NoOp};
+	};
 	Elm.Actions = Elm.Actions || {};
 	Elm.Actions.make = function (_elm) {
 	   "use strict";
@@ -11811,11 +12261,41 @@
 	   $Debug = Elm.Debug.make(_elm),
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
+	   $Players$Actions = Elm.Players.Actions.make(_elm),
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var PlayersAction = function (a) {
+	      return {ctor: "PlayersAction",_0: a};
+	   };
 	   var NoOp = {ctor: "NoOp"};
-	   return _elm.Actions.values = {_op: _op,NoOp: NoOp};
+	   return _elm.Actions.values = {_op: _op
+	                                ,NoOp: NoOp
+	                                ,PlayersAction: PlayersAction};
+	};
+	Elm.Players = Elm.Players || {};
+	Elm.Players.Models = Elm.Players.Models || {};
+	Elm.Players.Models.make = function (_elm) {
+	   "use strict";
+	   _elm.Players = _elm.Players || {};
+	   _elm.Players.Models = _elm.Players.Models || {};
+	   if (_elm.Players.Models.values)
+	   return _elm.Players.Models.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm);
+	   var _op = {};
+	   var $new = {id: 0,name: "",level: 1};
+	   var Player = F3(function (a,b,c) {
+	      return {id: a,name: b,level: c};
+	   });
+	   return _elm.Players.Models.values = {_op: _op
+	                                       ,Player: Player
+	                                       ,$new: $new};
 	};
 	Elm.Models = Elm.Models || {};
 	Elm.Models.make = function (_elm) {
@@ -11827,14 +12307,46 @@
 	   $Debug = Elm.Debug.make(_elm),
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
+	   $Players$Models = Elm.Players.Models.make(_elm),
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
-	   var initialModel = {};
-	   var AppModel = {};
+	   var initialModel = {players: _U.list([A3($Players$Models.Player,
+	   1,
+	   "Sam",
+	   1)])};
+	   var AppModel = function (a) {    return {players: a};};
 	   return _elm.Models.values = {_op: _op
 	                               ,AppModel: AppModel
 	                               ,initialModel: initialModel};
+	};
+	Elm.Players = Elm.Players || {};
+	Elm.Players.Update = Elm.Players.Update || {};
+	Elm.Players.Update.make = function (_elm) {
+	   "use strict";
+	   _elm.Players = _elm.Players || {};
+	   _elm.Players.Update = _elm.Players.Update || {};
+	   if (_elm.Players.Update.values)
+	   return _elm.Players.Update.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Effects = Elm.Effects.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Players$Actions = Elm.Players.Actions.make(_elm),
+	   $Players$Models = Elm.Players.Models.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm);
+	   var _op = {};
+	   var update = F2(function (action,model) {
+	      var _p0 = action;
+	      return {ctor: "_Tuple2",_0: model.players,_1: $Effects.none};
+	   });
+	   var UpdateModel = function (a) {    return {players: a};};
+	   return _elm.Players.Update.values = {_op: _op
+	                                       ,UpdateModel: UpdateModel
+	                                       ,update: update};
 	};
 	Elm.Update = Elm.Update || {};
 	Elm.Update.make = function (_elm) {
@@ -11849,13 +12361,93 @@
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Models = Elm.Models.make(_elm),
+	   $Players$Update = Elm.Players.Update.make(_elm),
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
 	   var update = F2(function (action,model) {
-	      return {ctor: "_Tuple2",_0: model,_1: $Effects.none};
+	      var _p0 = action;
+	      if (_p0.ctor === "PlayersAction") {
+	            var updateModel = {players: model.players};
+	            var _p1 = A2($Players$Update.update,_p0._0,updateModel);
+	            var updatedPlayers = _p1._0;
+	            var fx = _p1._1;
+	            return {ctor: "_Tuple2"
+	                   ,_0: _U.update(model,{players: updatedPlayers})
+	                   ,_1: A2($Effects.map,$Actions.PlayersAction,fx)};
+	         } else {
+	            return {ctor: "_Tuple2",_0: model,_1: $Effects.none};
+	         }
 	   });
 	   return _elm.Update.values = {_op: _op,update: update};
+	};
+	Elm.Players = Elm.Players || {};
+	Elm.Players.List = Elm.Players.List || {};
+	Elm.Players.List.make = function (_elm) {
+	   "use strict";
+	   _elm.Players = _elm.Players || {};
+	   _elm.Players.List = _elm.Players.List || {};
+	   if (_elm.Players.List.values) return _elm.Players.List.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Html = Elm.Html.make(_elm),
+	   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Players$Actions = Elm.Players.Actions.make(_elm),
+	   $Players$Models = Elm.Players.Models.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm);
+	   var _op = {};
+	   var playerRow = F3(function (address,model,player) {
+	      return A2($Html.tr,
+	      _U.list([]),
+	      _U.list([A2($Html.td,
+	              _U.list([]),
+	              _U.list([$Html.text($Basics.toString(player.id))]))
+	              ,A2($Html.td,_U.list([]),_U.list([$Html.text(player.name)]))
+	              ,A2($Html.td,
+	              _U.list([]),
+	              _U.list([$Html.text($Basics.toString(player.level))]))
+	              ,A2($Html.td,_U.list([]),_U.list([]))]));
+	   });
+	   var list = F2(function (address,model) {
+	      return A2($Html.div,
+	      _U.list([]),
+	      _U.list([A2($Html.table,
+	      _U.list([$Html$Attributes.$class("table-light")]),
+	      _U.list([A2($Html.thead,
+	              _U.list([]),
+	              _U.list([A2($Html.tr,
+	              _U.list([]),
+	              _U.list([A2($Html.th,_U.list([]),_U.list([$Html.text("Id")]))
+	                      ,A2($Html.th,_U.list([]),_U.list([$Html.text("Name")]))
+	                      ,A2($Html.th,_U.list([]),_U.list([$Html.text("Level")]))
+	                      ,A2($Html.th,_U.list([]),_U.list([$Html.text("Actions")]))]))]))
+	              ,A2($Html.tbody,
+	              _U.list([]),
+	              A2($List.map,A2(playerRow,address,model),model.players))]))]));
+	   });
+	   var nav = F2(function (address,model) {
+	      return A2($Html.div,
+	      _U.list([$Html$Attributes.$class("clearfix mb2 white bg-black")]),
+	      _U.list([A2($Html.div,
+	      _U.list([$Html$Attributes.$class("left p2")]),
+	      _U.list([$Html.text("Players")]))]));
+	   });
+	   var view = F2(function (address,model) {
+	      return A2($Html.div,
+	      _U.list([]),
+	      _U.list([A2(nav,address,model),A2(list,address,model)]));
+	   });
+	   var ViewModel = function (a) {    return {players: a};};
+	   return _elm.Players.List.values = {_op: _op
+	                                     ,ViewModel: ViewModel
+	                                     ,view: view
+	                                     ,nav: nav
+	                                     ,list: list
+	                                     ,playerRow: playerRow};
 	};
 	Elm.View = Elm.View || {};
 	Elm.View.make = function (_elm) {
@@ -11870,15 +12462,22 @@
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Models = Elm.Models.make(_elm),
+	   $Players$List = Elm.Players.List.make(_elm),
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var page = F2(function (address,model) {
+	      var viewModel = {players: model.players};
+	      return A2($Players$List.view,
+	      A2($Signal.forwardTo,address,$Actions.PlayersAction),
+	      viewModel);
+	   });
 	   var view = F2(function (address,model) {
 	      return A2($Html.div,
 	      _U.list([]),
-	      _U.list([$Html.text("Hello")]));
+	      _U.list([A2(page,address,model)]));
 	   });
-	   return _elm.View.values = {_op: _op,view: view};
+	   return _elm.View.values = {_op: _op,view: view,page: page};
 	};
 	Elm.Main = Elm.Main || {};
 	Elm.Main.make = function (_elm) {
