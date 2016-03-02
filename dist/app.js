@@ -12310,6 +12310,94 @@
 	                                        ,property: property
 	                                        ,attribute: attribute};
 	};
+	Elm.Html = Elm.Html || {};
+	Elm.Html.Events = Elm.Html.Events || {};
+	Elm.Html.Events.make = function (_elm) {
+	   "use strict";
+	   _elm.Html = _elm.Html || {};
+	   _elm.Html.Events = _elm.Html.Events || {};
+	   if (_elm.Html.Events.values) return _elm.Html.Events.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Html = Elm.Html.make(_elm),
+	   $Json$Decode = Elm.Json.Decode.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm),
+	   $VirtualDom = Elm.VirtualDom.make(_elm);
+	   var _op = {};
+	   var keyCode = A2($Json$Decode._op[":="],
+	   "keyCode",
+	   $Json$Decode.$int);
+	   var targetChecked = A2($Json$Decode.at,
+	   _U.list(["target","checked"]),
+	   $Json$Decode.bool);
+	   var targetValue = A2($Json$Decode.at,
+	   _U.list(["target","value"]),
+	   $Json$Decode.string);
+	   var defaultOptions = $VirtualDom.defaultOptions;
+	   var Options = F2(function (a,b) {
+	      return {stopPropagation: a,preventDefault: b};
+	   });
+	   var onWithOptions = $VirtualDom.onWithOptions;
+	   var on = $VirtualDom.on;
+	   var messageOn = F3(function (name,addr,msg) {
+	      return A3(on,
+	      name,
+	      $Json$Decode.value,
+	      function (_p0) {
+	         return A2($Signal.message,addr,msg);
+	      });
+	   });
+	   var onClick = messageOn("click");
+	   var onDoubleClick = messageOn("dblclick");
+	   var onMouseMove = messageOn("mousemove");
+	   var onMouseDown = messageOn("mousedown");
+	   var onMouseUp = messageOn("mouseup");
+	   var onMouseEnter = messageOn("mouseenter");
+	   var onMouseLeave = messageOn("mouseleave");
+	   var onMouseOver = messageOn("mouseover");
+	   var onMouseOut = messageOn("mouseout");
+	   var onBlur = messageOn("blur");
+	   var onFocus = messageOn("focus");
+	   var onSubmit = messageOn("submit");
+	   var onKey = F3(function (name,addr,handler) {
+	      return A3(on,
+	      name,
+	      keyCode,
+	      function (code) {
+	         return A2($Signal.message,addr,handler(code));
+	      });
+	   });
+	   var onKeyUp = onKey("keyup");
+	   var onKeyDown = onKey("keydown");
+	   var onKeyPress = onKey("keypress");
+	   return _elm.Html.Events.values = {_op: _op
+	                                    ,onBlur: onBlur
+	                                    ,onFocus: onFocus
+	                                    ,onSubmit: onSubmit
+	                                    ,onKeyUp: onKeyUp
+	                                    ,onKeyDown: onKeyDown
+	                                    ,onKeyPress: onKeyPress
+	                                    ,onClick: onClick
+	                                    ,onDoubleClick: onDoubleClick
+	                                    ,onMouseMove: onMouseMove
+	                                    ,onMouseDown: onMouseDown
+	                                    ,onMouseUp: onMouseUp
+	                                    ,onMouseEnter: onMouseEnter
+	                                    ,onMouseLeave: onMouseLeave
+	                                    ,onMouseOver: onMouseOver
+	                                    ,onMouseOut: onMouseOut
+	                                    ,on: on
+	                                    ,onWithOptions: onWithOptions
+	                                    ,defaultOptions: defaultOptions
+	                                    ,targetValue: targetValue
+	                                    ,targetChecked: targetChecked
+	                                    ,keyCode: keyCode
+	                                    ,Options: Options};
+	};
 	Elm.Native.Http = {};
 	Elm.Native.Http.make = function(localRuntime) {
 
@@ -13059,6 +13147,30 @@
 	                            ,clearQuery: clearQuery};
 	};
 	Elm.Players = Elm.Players || {};
+	Elm.Players.Models = Elm.Players.Models || {};
+	Elm.Players.Models.make = function (_elm) {
+	   "use strict";
+	   _elm.Players = _elm.Players || {};
+	   _elm.Players.Models = _elm.Players.Models || {};
+	   if (_elm.Players.Models.values)
+	   return _elm.Players.Models.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm);
+	   var _op = {};
+	   var $new = {id: 0,name: "",level: 1};
+	   var Player = F3(function (a,b,c) {
+	      return {id: a,name: b,level: c};
+	   });
+	   return _elm.Players.Models.values = {_op: _op
+	                                       ,Player: Player
+	                                       ,$new: $new};
+	};
+	Elm.Players = Elm.Players || {};
 	Elm.Players.Actions = Elm.Players.Actions || {};
 	Elm.Players.Actions.make = function (_elm) {
 	   "use strict";
@@ -13069,13 +13181,26 @@
 	   var _U = Elm.Native.Utils.make(_elm),
 	   $Basics = Elm.Basics.make(_elm),
 	   $Debug = Elm.Debug.make(_elm),
+	   $Hop = Elm.Hop.make(_elm),
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
+	   $Players$Models = Elm.Players.Models.make(_elm),
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var ListPlayers = {ctor: "ListPlayers"};
+	   var EditPlayer = function (a) {
+	      return {ctor: "EditPlayer",_0: a};
+	   };
+	   var HopAction = function (a) {
+	      return {ctor: "HopAction",_0: a};
+	   };
 	   var NoOp = {ctor: "NoOp"};
-	   return _elm.Players.Actions.values = {_op: _op,NoOp: NoOp};
+	   return _elm.Players.Actions.values = {_op: _op
+	                                        ,NoOp: NoOp
+	                                        ,HopAction: HopAction
+	                                        ,EditPlayer: EditPlayer
+	                                        ,ListPlayers: ListPlayers};
 	};
 	Elm.Routing = Elm.Routing || {};
 	Elm.Routing.make = function (_elm) {
@@ -13182,30 +13307,6 @@
 	                                ,RoutingAction: RoutingAction
 	                                ,PlayersAction: PlayersAction};
 	};
-	Elm.Players = Elm.Players || {};
-	Elm.Players.Models = Elm.Players.Models || {};
-	Elm.Players.Models.make = function (_elm) {
-	   "use strict";
-	   _elm.Players = _elm.Players || {};
-	   _elm.Players.Models = _elm.Players.Models || {};
-	   if (_elm.Players.Models.values)
-	   return _elm.Players.Models.values;
-	   var _U = Elm.Native.Utils.make(_elm),
-	   $Basics = Elm.Basics.make(_elm),
-	   $Debug = Elm.Debug.make(_elm),
-	   $List = Elm.List.make(_elm),
-	   $Maybe = Elm.Maybe.make(_elm),
-	   $Result = Elm.Result.make(_elm),
-	   $Signal = Elm.Signal.make(_elm);
-	   var _op = {};
-	   var $new = {id: 0,name: "",level: 1};
-	   var Player = F3(function (a,b,c) {
-	      return {id: a,name: b,level: c};
-	   });
-	   return _elm.Players.Models.values = {_op: _op
-	                                       ,Player: Player
-	                                       ,$new: $new};
-	};
 	Elm.Models = Elm.Models || {};
 	Elm.Models.make = function (_elm) {
 	   "use strict";
@@ -13245,6 +13346,7 @@
 	   $Basics = Elm.Basics.make(_elm),
 	   $Debug = Elm.Debug.make(_elm),
 	   $Effects = Elm.Effects.make(_elm),
+	   $Hop = Elm.Hop.make(_elm),
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Players$Actions = Elm.Players.Actions.make(_elm),
@@ -13254,7 +13356,27 @@
 	   var _op = {};
 	   var update = F2(function (action,model) {
 	      var _p0 = action;
-	      return {ctor: "_Tuple2",_0: model.players,_1: $Effects.none};
+	      switch (_p0.ctor)
+	      {case "EditPlayer": var path = A2($Basics._op["++"],
+	           "/players/",
+	           A2($Basics._op["++"],$Basics.toString(_p0._0),"/edit"));
+	           return {ctor: "_Tuple2"
+	                  ,_0: model.players
+	                  ,_1: A2($Effects.map,
+	                  $Players$Actions.HopAction,
+	                  $Hop.navigateTo(path))};
+	         case "ListPlayers": var path = "/players/";
+	           return {ctor: "_Tuple2"
+	                  ,_0: model.players
+	                  ,_1: A2($Effects.map,
+	                  $Players$Actions.HopAction,
+	                  $Hop.navigateTo(path))};
+	         case "HopAction": return {ctor: "_Tuple2"
+	                                  ,_0: model.players
+	                                  ,_1: $Effects.none};
+	         default: return {ctor: "_Tuple2"
+	                         ,_0: model.players
+	                         ,_1: $Effects.none};}
 	   });
 	   var UpdateModel = function (a) {    return {players: a};};
 	   return _elm.Players.Update.values = {_op: _op
@@ -13314,6 +13436,7 @@
 	   $Debug = Elm.Debug.make(_elm),
 	   $Html = Elm.Html.make(_elm),
 	   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+	   $Html$Events = Elm.Html.Events.make(_elm),
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Players$Actions = Elm.Players.Actions.make(_elm),
@@ -13321,6 +13444,17 @@
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var editBtn = F2(function (address,player) {
+	      return A2($Html.button,
+	      _U.list([$Html$Attributes.$class("btn regular")
+	              ,A2($Html$Events.onClick,
+	              address,
+	              $Players$Actions.EditPlayer(player.id))]),
+	      _U.list([A2($Html.i,
+	              _U.list([$Html$Attributes.$class("fa fa-pencil mr1")]),
+	              _U.list([]))
+	              ,$Html.text("Edit")]));
+	   });
 	   var playerRow = F3(function (address,model,player) {
 	      return A2($Html.tr,
 	      _U.list([]),
@@ -13331,7 +13465,9 @@
 	              ,A2($Html.td,
 	              _U.list([]),
 	              _U.list([$Html.text($Basics.toString(player.level))]))
-	              ,A2($Html.td,_U.list([]),_U.list([]))]));
+	              ,A2($Html.td,
+	              _U.list([]),
+	              _U.list([A2(editBtn,address,player)]))]));
 	   });
 	   var list = F2(function (address,model) {
 	      return A2($Html.div,
@@ -13368,7 +13504,115 @@
 	                                     ,view: view
 	                                     ,nav: nav
 	                                     ,list: list
-	                                     ,playerRow: playerRow};
+	                                     ,playerRow: playerRow
+	                                     ,editBtn: editBtn};
+	};
+	Elm.Players = Elm.Players || {};
+	Elm.Players.Edit = Elm.Players.Edit || {};
+	Elm.Players.Edit.make = function (_elm) {
+	   "use strict";
+	   _elm.Players = _elm.Players || {};
+	   _elm.Players.Edit = _elm.Players.Edit || {};
+	   if (_elm.Players.Edit.values) return _elm.Players.Edit.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Html = Elm.Html.make(_elm),
+	   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+	   $Html$Events = Elm.Html.Events.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Players$Actions = Elm.Players.Actions.make(_elm),
+	   $Players$Models = Elm.Players.Models.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm);
+	   var _op = {};
+	   var listBtn = F2(function (address,model) {
+	      return A2($Html.button,
+	      _U.list([$Html$Attributes.$class("btn regular")
+	              ,A2($Html$Events.onClick,
+	              address,
+	              $Players$Actions.ListPlayers)]),
+	      _U.list([A2($Html.i,
+	              _U.list([$Html$Attributes.$class("fa fa-chevron-left mr1")]),
+	              _U.list([]))
+	              ,$Html.text("List")]));
+	   });
+	   var inputName = F2(function (address,model) {
+	      return A2($Html.input,
+	      _U.list([$Html$Attributes.$class("field-light")
+	              ,$Html$Attributes.value(model.player.name)]),
+	      _U.list([]));
+	   });
+	   var formName = F2(function (address,model) {
+	      return A2($Html.div,
+	      _U.list([$Html$Attributes.$class("clearfix py1")]),
+	      _U.list([A2($Html.div,
+	              _U.list([$Html$Attributes.$class("col col-5")]),
+	              _U.list([$Html.text("Name")]))
+	              ,A2($Html.div,
+	              _U.list([$Html$Attributes.$class("col col-7")]),
+	              _U.list([A2(inputName,address,model)]))]));
+	   });
+	   var btnLevelIncrease = F2(function (address,model) {
+	      return A2($Html.a,
+	      _U.list([$Html$Attributes.$class("btn ml1 h1")]),
+	      _U.list([A2($Html.i,
+	      _U.list([$Html$Attributes.$class("fa fa-plus-circle")]),
+	      _U.list([]))]));
+	   });
+	   var btnLevelDecrease = F2(function (address,model) {
+	      return A2($Html.a,
+	      _U.list([$Html$Attributes.$class("btn ml1 h1")]),
+	      _U.list([A2($Html.i,
+	      _U.list([$Html$Attributes.$class("fa fa-minus-circle")]),
+	      _U.list([]))]));
+	   });
+	   var formLevel = F2(function (address,model) {
+	      return A2($Html.div,
+	      _U.list([$Html$Attributes.$class("clearfix py1")]),
+	      _U.list([A2($Html.div,
+	              _U.list([$Html$Attributes.$class("col col-5")]),
+	              _U.list([$Html.text("Level")]))
+	              ,A2($Html.div,
+	              _U.list([$Html$Attributes.$class("col col-7")]),
+	              _U.list([A2($Html.span,
+	                      _U.list([$Html$Attributes.$class("h2 bold")]),
+	                      _U.list([$Html.text($Basics.toString(model.player.level))]))
+	                      ,A2(btnLevelDecrease,address,model)
+	                      ,A2(btnLevelIncrease,address,model)]))]));
+	   });
+	   var form = F2(function (address,model) {
+	      return A2($Html.div,
+	      _U.list([$Html$Attributes.$class("m3")]),
+	      _U.list([A2($Html.h1,
+	              _U.list([]),
+	              _U.list([$Html.text(model.player.name)]))
+	              ,A2(formLevel,address,model)
+	              ,A2(formName,address,model)]));
+	   });
+	   var nav = F2(function (address,model) {
+	      return A2($Html.div,
+	      _U.list([$Html$Attributes.$class("clearfix mb2 white bg-black p1")]),
+	      _U.list([A2(listBtn,address,model)]));
+	   });
+	   var view = F2(function (address,model) {
+	      return A2($Html.div,
+	      _U.list([]),
+	      _U.list([A2(nav,address,model),A2(form,address,model)]));
+	   });
+	   var ViewModel = function (a) {    return {player: a};};
+	   return _elm.Players.Edit.values = {_op: _op
+	                                     ,ViewModel: ViewModel
+	                                     ,view: view
+	                                     ,nav: nav
+	                                     ,form: form
+	                                     ,formLevel: formLevel
+	                                     ,btnLevelDecrease: btnLevelDecrease
+	                                     ,btnLevelIncrease: btnLevelIncrease
+	                                     ,formName: formName
+	                                     ,inputName: inputName
+	                                     ,listBtn: listBtn};
 	};
 	Elm.View = Elm.View || {};
 	Elm.View.make = function (_elm) {
@@ -13379,26 +13623,64 @@
 	   $Actions = Elm.Actions.make(_elm),
 	   $Basics = Elm.Basics.make(_elm),
 	   $Debug = Elm.Debug.make(_elm),
+	   $Dict = Elm.Dict.make(_elm),
 	   $Html = Elm.Html.make(_elm),
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Models = Elm.Models.make(_elm),
+	   $Players$Edit = Elm.Players.Edit.make(_elm),
 	   $Players$List = Elm.Players.List.make(_elm),
 	   $Result = Elm.Result.make(_elm),
+	   $Routing = Elm.Routing.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
-	   var page = F2(function (address,model) {
+	   var notFoundView = A2($Html.div,
+	   _U.list([]),
+	   _U.list([$Html.text("Not Found")]));
+	   var playerEditPage = F2(function (address,model) {
+	      var playerId = A2($Maybe.withDefault,
+	      "",
+	      A2($Dict.get,"id",model.routing.routerPayload.params));
+	      var maybePlayer = $List.head(A2($List.filter,
+	      function (player) {
+	         return _U.eq($Basics.toString(player.id),playerId);
+	      },
+	      model.players));
+	      var _p0 = maybePlayer;
+	      if (_p0.ctor === "Just") {
+	            var viewModel = {player: _p0._0};
+	            return A2($Players$Edit.view,
+	            A2($Signal.forwardTo,address,$Actions.PlayersAction),
+	            viewModel);
+	         } else {
+	            return notFoundView;
+	         }
+	   });
+	   var playersPage = F2(function (address,model) {
 	      var viewModel = {players: model.players};
 	      return A2($Players$List.view,
 	      A2($Signal.forwardTo,address,$Actions.PlayersAction),
 	      viewModel);
 	   });
+	   var page = F2(function (address,model) {
+	      var _p1 = model.routing.view;
+	      switch (_p1.ctor)
+	      {case "PlayersView": return A2(playersPage,address,model);
+	         case "PlayerEditView": return A2(playerEditPage,address,model);
+	         default: return notFoundView;}
+	   });
 	   var view = F2(function (address,model) {
+	      var _p2 = A2($Debug.log,"model",model);
 	      return A2($Html.div,
 	      _U.list([]),
 	      _U.list([A2(page,address,model)]));
 	   });
-	   return _elm.View.values = {_op: _op,view: view,page: page};
+	   return _elm.View.values = {_op: _op
+	                             ,view: view
+	                             ,page: page
+	                             ,playersPage: playersPage
+	                             ,playerEditPage: playerEditPage
+	                             ,notFoundView: notFoundView};
 	};
 	Elm.Main = Elm.Main || {};
 	Elm.Main.make = function (_elm) {
@@ -13415,17 +13697,22 @@
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Models = Elm.Models.make(_elm),
 	   $Result = Elm.Result.make(_elm),
+	   $Routing = Elm.Routing.make(_elm),
 	   $Signal = Elm.Signal.make(_elm),
 	   $StartApp = Elm.StartApp.make(_elm),
 	   $Task = Elm.Task.make(_elm),
 	   $Update = Elm.Update.make(_elm),
 	   $View = Elm.View.make(_elm);
 	   var _op = {};
+	   var routeRunTask = Elm.Native.Task.make(_elm).perform($Routing.router.run);
+	   var routerSignal = A2($Signal.map,
+	   $Actions.RoutingAction,
+	   $Routing.router.signal);
 	   var init = {ctor: "_Tuple2"
 	              ,_0: $Models.initialModel
 	              ,_1: $Effects.none};
 	   var app = $StartApp.start({init: init
-	                             ,inputs: _U.list([])
+	                             ,inputs: _U.list([routerSignal])
 	                             ,update: $Update.update
 	                             ,view: $View.view});
 	   var main = app.html;
@@ -13433,6 +13720,7 @@
 	   app.tasks);
 	   return _elm.Main.values = {_op: _op
 	                             ,init: init
+	                             ,routerSignal: routerSignal
 	                             ,app: app
 	                             ,main: main};
 	};

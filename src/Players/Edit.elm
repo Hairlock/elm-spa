@@ -3,6 +3,7 @@ module Players.Edit (..) where
 
 import Html exposing (..)
 import Html.Attributes exposing (class, value, href)
+import Html.Events exposing (onClick)
 import Players.Models exposing (..)
 import Players.Actions exposing (..)
 
@@ -14,6 +15,7 @@ type alias ViewModel =
 
 view : Signal.Address Action -> ViewModel -> Html.Html
 view address model =
+    div
     []
     [ nav address model
     , form address model 
@@ -24,7 +26,7 @@ nav : Signal.Address Action -> ViewModel -> Html.Html
 nav address model =
     div
         [ class "clearfix mb2 white bg-black p1" ]
-        []
+        [ listBtn address model ]
 
 
 form : Signal.Address Action -> ViewModel -> Html.Html
@@ -38,7 +40,7 @@ form address model =
 
 
 formLevel : Signal.Address Action -> ViewModel -> Html.Html
-form address model =
+formLevel address model =
     div
     [ class "clearfix py1" ]
     [ div [ class "col col-5" ] [ text "Level" ]
@@ -83,3 +85,12 @@ inputName address model =
         [ class "field-light"
         , value model.player.name ]
         []
+
+
+listBtn :  Signal.Address Action -> ViewModel -> Html.Html
+listBtn address model =
+    button
+        [ class "btn regular"
+        , onClick address ListPlayers
+        ]
+        [ i [ class "fa fa-chevron-left mr1" ] [], text "List" ]
