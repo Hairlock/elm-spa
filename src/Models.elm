@@ -8,11 +8,13 @@ import Routing
 type alias AppModel =
     { players : List Player
     , routing : Routing.Model
+    , errorMessage : String
     }
 
 
 initialModel : AppModel
 initialModel =
-    { players = [ Player 1 "Sam" 1] 
+    { players = [] 
     , routing = Routing.initialModel
+    , errorMessage = ""
     }

@@ -1,7 +1,7 @@
 module Players.Actions (..) where
 
-
-import Players.Models exposing (PlayerId)
+import Http
+import Players.Models exposing (PlayerId, Player)
 import Hop
 
 
@@ -10,3 +10,5 @@ type Action
     | HopAction Hop.Action
     | EditPlayer PlayerId
     | ListPlayers
+    | FetchAllDone (Result Http.Error (List Player))
+    | TaskDone ()

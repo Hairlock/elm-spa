@@ -9,6 +9,7 @@ import Hop
 
 type alias UpdateModel =
     { players : List Player
+    , showErrorAddress : Signal.Address String
     }
 
 
@@ -30,6 +31,26 @@ update action model =
                 ( model.players, Effects.map HopAction (Hop.navigateTo path) )
 
         HopAction _ ->
+            ( model.players, Effects.none )
+
+        FetchAllDone result ->
+            case result of
+                Ok players ->
+                    ( players, Effects.none )
+
+                Err error ->
+                    let
+                        errorMessage =
+                            toString error
+
+                        fx =
+                            Signal.send model.showErrorAddress errorMessage
+                                |> Effects.task
+                                |> Effects.map TaskDone
+                    in
+                        ( model.players, fx )
+
+        TaskDone () ->
             ( model.players, Effects.none )
 
         NoOp ->

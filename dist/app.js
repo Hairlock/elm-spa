@@ -13182,12 +13182,19 @@
 	   $Basics = Elm.Basics.make(_elm),
 	   $Debug = Elm.Debug.make(_elm),
 	   $Hop = Elm.Hop.make(_elm),
+	   $Http = Elm.Http.make(_elm),
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Players$Models = Elm.Players.Models.make(_elm),
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var TaskDone = function (a) {
+	      return {ctor: "TaskDone",_0: a};
+	   };
+	   var FetchAllDone = function (a) {
+	      return {ctor: "FetchAllDone",_0: a};
+	   };
 	   var ListPlayers = {ctor: "ListPlayers"};
 	   var EditPlayer = function (a) {
 	      return {ctor: "EditPlayer",_0: a};
@@ -13200,7 +13207,9 @@
 	                                        ,NoOp: NoOp
 	                                        ,HopAction: HopAction
 	                                        ,EditPlayer: EditPlayer
-	                                        ,ListPlayers: ListPlayers};
+	                                        ,ListPlayers: ListPlayers
+	                                        ,FetchAllDone: FetchAllDone
+	                                        ,TaskDone: TaskDone};
 	};
 	Elm.Routing = Elm.Routing || {};
 	Elm.Routing.make = function (_elm) {
@@ -13295,6 +13304,9 @@
 	   $Routing = Elm.Routing.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var ShowError = function (a) {
+	      return {ctor: "ShowError",_0: a};
+	   };
 	   var PlayersAction = function (a) {
 	      return {ctor: "PlayersAction",_0: a};
 	   };
@@ -13305,7 +13317,26 @@
 	   return _elm.Actions.values = {_op: _op
 	                                ,NoOp: NoOp
 	                                ,RoutingAction: RoutingAction
-	                                ,PlayersAction: PlayersAction};
+	                                ,PlayersAction: PlayersAction
+	                                ,ShowError: ShowError};
+	};
+	Elm.Mailboxes = Elm.Mailboxes || {};
+	Elm.Mailboxes.make = function (_elm) {
+	   "use strict";
+	   _elm.Mailboxes = _elm.Mailboxes || {};
+	   if (_elm.Mailboxes.values) return _elm.Mailboxes.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Actions = Elm.Actions.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm);
+	   var _op = {};
+	   var actionsMailbox = $Signal.mailbox($Actions.NoOp);
+	   return _elm.Mailboxes.values = {_op: _op
+	                                  ,actionsMailbox: actionsMailbox};
 	};
 	Elm.Models = Elm.Models || {};
 	Elm.Models.make = function (_elm) {
@@ -13322,13 +13353,11 @@
 	   $Routing = Elm.Routing.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
-	   var initialModel = {players: _U.list([A3($Players$Models.Player,
-	                      1,
-	                      "Sam",
-	                      1)])
-	                      ,routing: $Routing.initialModel};
-	   var AppModel = F2(function (a,b) {
-	      return {players: a,routing: b};
+	   var initialModel = {players: _U.list([])
+	                      ,routing: $Routing.initialModel
+	                      ,errorMessage: ""};
+	   var AppModel = F3(function (a,b,c) {
+	      return {players: a,routing: b,errorMessage: c};
 	   });
 	   return _elm.Models.values = {_op: _op
 	                               ,AppModel: AppModel
@@ -13374,11 +13403,28 @@
 	         case "HopAction": return {ctor: "_Tuple2"
 	                                  ,_0: model.players
 	                                  ,_1: $Effects.none};
+	         case "FetchAllDone": var _p1 = _p0._0;
+	           if (_p1.ctor === "Ok") {
+	                 return {ctor: "_Tuple2",_0: _p1._0,_1: $Effects.none};
+	              } else {
+	                 var errorMessage = $Basics.toString(_p1._0);
+	                 var fx = A2($Effects.map,
+	                 $Players$Actions.TaskDone,
+	                 $Effects.task(A2($Signal.send,
+	                 model.showErrorAddress,
+	                 errorMessage)));
+	                 return {ctor: "_Tuple2",_0: model.players,_1: fx};
+	              }
+	         case "TaskDone": return {ctor: "_Tuple2"
+	                                 ,_0: model.players
+	                                 ,_1: $Effects.none};
 	         default: return {ctor: "_Tuple2"
 	                         ,_0: model.players
 	                         ,_1: $Effects.none};}
 	   });
-	   var UpdateModel = function (a) {    return {players: a};};
+	   var UpdateModel = F2(function (a,b) {
+	      return {players: a,showErrorAddress: b};
+	   });
 	   return _elm.Players.Update.values = {_op: _op
 	                                       ,UpdateModel: UpdateModel
 	                                       ,update: update};
@@ -13394,6 +13440,7 @@
 	   $Debug = Elm.Debug.make(_elm),
 	   $Effects = Elm.Effects.make(_elm),
 	   $List = Elm.List.make(_elm),
+	   $Mailboxes = Elm.Mailboxes.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Models = Elm.Models.make(_elm),
 	   $Players$Update = Elm.Players.Update.make(_elm),
@@ -13412,14 +13459,19 @@
 	           return {ctor: "_Tuple2"
 	                  ,_0: _U.update(model,{routing: updatedRouting})
 	                  ,_1: A2($Effects.map,$Actions.RoutingAction,fx)};
-	         case "PlayersAction":
-	         var updateModel = {players: model.players};
+	         case "PlayersAction": var updateModel = {players: model.players
+	                                                 ,showErrorAddress: A2($Signal.forwardTo,
+	                                                 $Mailboxes.actionsMailbox.address,
+	                                                 $Actions.ShowError)};
 	           var _p2 = A2($Players$Update.update,_p0._0,updateModel);
 	           var updatedPlayers = _p2._0;
 	           var fx = _p2._1;
 	           return {ctor: "_Tuple2"
 	                  ,_0: _U.update(model,{players: updatedPlayers})
 	                  ,_1: A2($Effects.map,$Actions.PlayersAction,fx)};
+	         case "ShowError": return {ctor: "_Tuple2"
+	                                  ,_0: _U.update(model,{errorMessage: _p0._0})
+	                                  ,_1: $Effects.none};
 	         default: return {ctor: "_Tuple2",_0: model,_1: $Effects.none};}
 	   });
 	   return _elm.Update.values = {_op: _op,update: update};
@@ -13625,6 +13677,7 @@
 	   $Debug = Elm.Debug.make(_elm),
 	   $Dict = Elm.Dict.make(_elm),
 	   $Html = Elm.Html.make(_elm),
+	   $Html$Attributes = Elm.Html.Attributes.make(_elm),
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Models = Elm.Models.make(_elm),
@@ -13632,11 +13685,19 @@
 	   $Players$List = Elm.Players.List.make(_elm),
 	   $Result = Elm.Result.make(_elm),
 	   $Routing = Elm.Routing.make(_elm),
-	   $Signal = Elm.Signal.make(_elm);
+	   $Signal = Elm.Signal.make(_elm),
+	   $String = Elm.String.make(_elm);
 	   var _op = {};
 	   var notFoundView = A2($Html.div,
 	   _U.list([]),
 	   _U.list([$Html.text("Not Found")]));
+	   var flash = F2(function (address,model) {
+	      return $String.isEmpty(model.errorMessage) ? A2($Html.span,
+	      _U.list([]),
+	      _U.list([])) : A2($Html.div,
+	      _U.list([$Html$Attributes.$class("bold center p2 mb2 white bg-red rounded")]),
+	      _U.list([$Html.text(model.errorMessage)]));
+	   });
 	   var playerEditPage = F2(function (address,model) {
 	      var playerId = A2($Maybe.withDefault,
 	      "",
@@ -13673,14 +13734,53 @@
 	      var _p2 = A2($Debug.log,"model",model);
 	      return A2($Html.div,
 	      _U.list([]),
-	      _U.list([A2(page,address,model)]));
+	      _U.list([A2(flash,address,model),A2(page,address,model)]));
 	   });
 	   return _elm.View.values = {_op: _op
 	                             ,view: view
 	                             ,page: page
 	                             ,playersPage: playersPage
 	                             ,playerEditPage: playerEditPage
+	                             ,flash: flash
 	                             ,notFoundView: notFoundView};
+	};
+	Elm.Players = Elm.Players || {};
+	Elm.Players.Effects = Elm.Players.Effects || {};
+	Elm.Players.Effects.make = function (_elm) {
+	   "use strict";
+	   _elm.Players = _elm.Players || {};
+	   _elm.Players.Effects = _elm.Players.Effects || {};
+	   if (_elm.Players.Effects.values)
+	   return _elm.Players.Effects.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Effects = Elm.Effects.make(_elm),
+	   $Http = Elm.Http.make(_elm),
+	   $Json$Decode = Elm.Json.Decode.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Players$Actions = Elm.Players.Actions.make(_elm),
+	   $Players$Models = Elm.Players.Models.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm),
+	   $Task = Elm.Task.make(_elm);
+	   var _op = {};
+	   var memberDecoder = A4($Json$Decode.object3,
+	   $Players$Models.Player,
+	   A2($Json$Decode._op[":="],"id",$Json$Decode.$int),
+	   A2($Json$Decode._op[":="],"name",$Json$Decode.string),
+	   A2($Json$Decode._op[":="],"level",$Json$Decode.$int));
+	   var collectionDecoder = $Json$Decode.list(memberDecoder);
+	   var fetchAllUrl = "http://localhost:4000/players";
+	   var fetchAll = $Effects.task(A2($Task.map,
+	   $Players$Actions.FetchAllDone,
+	   $Task.toResult(A2($Http.get,collectionDecoder,fetchAllUrl))));
+	   return _elm.Players.Effects.values = {_op: _op
+	                                        ,fetchAll: fetchAll
+	                                        ,fetchAllUrl: fetchAllUrl
+	                                        ,collectionDecoder: collectionDecoder
+	                                        ,memberDecoder: memberDecoder};
 	};
 	Elm.Main = Elm.Main || {};
 	Elm.Main.make = function (_elm) {
@@ -13694,8 +13794,10 @@
 	   $Effects = Elm.Effects.make(_elm),
 	   $Html = Elm.Html.make(_elm),
 	   $List = Elm.List.make(_elm),
+	   $Mailboxes = Elm.Mailboxes.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Models = Elm.Models.make(_elm),
+	   $Players$Effects = Elm.Players.Effects.make(_elm),
 	   $Result = Elm.Result.make(_elm),
 	   $Routing = Elm.Routing.make(_elm),
 	   $Signal = Elm.Signal.make(_elm),
@@ -13708,11 +13810,16 @@
 	   var routerSignal = A2($Signal.map,
 	   $Actions.RoutingAction,
 	   $Routing.router.signal);
-	   var init = {ctor: "_Tuple2"
-	              ,_0: $Models.initialModel
-	              ,_1: $Effects.none};
+	   var init = function () {
+	      var fxs = _U.list([A2($Effects.map,
+	      $Actions.PlayersAction,
+	      $Players$Effects.fetchAll)]);
+	      var fx = $Effects.batch(fxs);
+	      return {ctor: "_Tuple2",_0: $Models.initialModel,_1: fx};
+	   }();
 	   var app = $StartApp.start({init: init
-	                             ,inputs: _U.list([routerSignal])
+	                             ,inputs: _U.list([routerSignal
+	                                              ,$Mailboxes.actionsMailbox.signal])
 	                             ,update: $Update.update
 	                             ,view: $View.view});
 	   var main = app.html;
