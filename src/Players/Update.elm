@@ -3,7 +3,9 @@ module Players.Update (..) where
 
 import Effects exposing (Effects)
 import Players.Actions exposing (..)
-import Players.Models exposing (..)
+import Players.Models exposing (new, Player)
+import Players.Effects exposing (create)
+import Task
 import Hop
 
 
@@ -29,6 +31,34 @@ update action model =
                     "/players/"
             in
                 ( model.players, Effects.map HopAction (Hop.navigateTo path) )
+
+        CreatePlayer ->
+            ( model.players, create new )
+
+        CreatePlayerDone result ->
+            case result of
+                Ok player ->
+                    let
+                        updatedCollection =
+                            player :: model.players
+
+                        fx =
+                            Task.succeed (EditPlayer player.id)
+                                |> Effects.task
+                    in
+                        ( updatedCollection, fx )
+
+                Err error ->
+                    let
+                        message =
+                            toString error
+
+                        fx =
+                            Signal.send model.showErrorAddress message
+                                |> Effects.task
+                                |> Effects.map TaskDone
+                    in
+                        ( model.players, fx )
 
         HopAction _ ->
             ( model.players, Effects.none )

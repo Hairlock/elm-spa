@@ -13189,6 +13189,10 @@
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var CreatePlayerDone = function (a) {
+	      return {ctor: "CreatePlayerDone",_0: a};
+	   };
+	   var CreatePlayer = {ctor: "CreatePlayer"};
 	   var TaskDone = function (a) {
 	      return {ctor: "TaskDone",_0: a};
 	   };
@@ -13209,7 +13213,9 @@
 	                                        ,EditPlayer: EditPlayer
 	                                        ,ListPlayers: ListPlayers
 	                                        ,FetchAllDone: FetchAllDone
-	                                        ,TaskDone: TaskDone};
+	                                        ,TaskDone: TaskDone
+	                                        ,CreatePlayer: CreatePlayer
+	                                        ,CreatePlayerDone: CreatePlayerDone};
 	};
 	Elm.Routing = Elm.Routing || {};
 	Elm.Routing.make = function (_elm) {
@@ -13364,6 +13370,77 @@
 	                               ,initialModel: initialModel};
 	};
 	Elm.Players = Elm.Players || {};
+	Elm.Players.Effects = Elm.Players.Effects || {};
+	Elm.Players.Effects.make = function (_elm) {
+	   "use strict";
+	   _elm.Players = _elm.Players || {};
+	   _elm.Players.Effects = _elm.Players.Effects || {};
+	   if (_elm.Players.Effects.values)
+	   return _elm.Players.Effects.values;
+	   var _U = Elm.Native.Utils.make(_elm),
+	   $Basics = Elm.Basics.make(_elm),
+	   $Debug = Elm.Debug.make(_elm),
+	   $Effects = Elm.Effects.make(_elm),
+	   $Http = Elm.Http.make(_elm),
+	   $Json$Decode = Elm.Json.Decode.make(_elm),
+	   $Json$Encode = Elm.Json.Encode.make(_elm),
+	   $List = Elm.List.make(_elm),
+	   $Maybe = Elm.Maybe.make(_elm),
+	   $Players$Actions = Elm.Players.Actions.make(_elm),
+	   $Players$Models = Elm.Players.Models.make(_elm),
+	   $Result = Elm.Result.make(_elm),
+	   $Signal = Elm.Signal.make(_elm),
+	   $Task = Elm.Task.make(_elm);
+	   var _op = {};
+	   var memberEncoded = function (player) {
+	      var list = _U.list([{ctor: "_Tuple2"
+	                          ,_0: "id"
+	                          ,_1: $Json$Encode.$int(player.id)}
+	                         ,{ctor: "_Tuple2"
+	                          ,_0: "name"
+	                          ,_1: $Json$Encode.string(player.name)}
+	                         ,{ctor: "_Tuple2"
+	                          ,_0: "level"
+	                          ,_1: $Json$Encode.$int(player.level)}]);
+	      return $Json$Encode.object(list);
+	   };
+	   var memberDecoder = A4($Json$Decode.object3,
+	   $Players$Models.Player,
+	   A2($Json$Decode._op[":="],"id",$Json$Decode.$int),
+	   A2($Json$Decode._op[":="],"name",$Json$Decode.string),
+	   A2($Json$Decode._op[":="],"level",$Json$Decode.$int));
+	   var collectionDecoder = $Json$Decode.list(memberDecoder);
+	   var fetchAllUrl = "http://localhost:4000/players";
+	   var fetchAll = $Effects.task(A2($Task.map,
+	   $Players$Actions.FetchAllDone,
+	   $Task.toResult(A2($Http.get,collectionDecoder,fetchAllUrl))));
+	   var createUrl = "http://localhost:4000/players";
+	   var create = function (player) {
+	      var body = $Http.string(A2($Json$Encode.encode,
+	      0,
+	      memberEncoded(player)));
+	      var config = {verb: "POST"
+	                   ,headers: _U.list([{ctor: "_Tuple2"
+	                                      ,_0: "Content-Type"
+	                                      ,_1: "application/json"}])
+	                   ,url: createUrl
+	                   ,body: body};
+	      return $Effects.task(A2($Task.map,
+	      $Players$Actions.CreatePlayerDone,
+	      $Task.toResult(A2($Http.fromJson,
+	      memberDecoder,
+	      A2($Http.send,$Http.defaultSettings,config)))));
+	   };
+	   return _elm.Players.Effects.values = {_op: _op
+	                                        ,create: create
+	                                        ,createUrl: createUrl
+	                                        ,fetchAll: fetchAll
+	                                        ,fetchAllUrl: fetchAllUrl
+	                                        ,collectionDecoder: collectionDecoder
+	                                        ,memberDecoder: memberDecoder
+	                                        ,memberEncoded: memberEncoded};
+	};
+	Elm.Players = Elm.Players || {};
 	Elm.Players.Update = Elm.Players.Update || {};
 	Elm.Players.Update.make = function (_elm) {
 	   "use strict";
@@ -13379,9 +13456,11 @@
 	   $List = Elm.List.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Players$Actions = Elm.Players.Actions.make(_elm),
+	   $Players$Effects = Elm.Players.Effects.make(_elm),
 	   $Players$Models = Elm.Players.Models.make(_elm),
 	   $Result = Elm.Result.make(_elm),
-	   $Signal = Elm.Signal.make(_elm);
+	   $Signal = Elm.Signal.make(_elm),
+	   $Task = Elm.Task.make(_elm);
 	   var _op = {};
 	   var update = F2(function (action,model) {
 	      var _p0 = action;
@@ -13400,14 +13479,30 @@
 	                  ,_1: A2($Effects.map,
 	                  $Players$Actions.HopAction,
 	                  $Hop.navigateTo(path))};
+	         case "CreatePlayer": return {ctor: "_Tuple2"
+	                                     ,_0: model.players
+	                                     ,_1: $Players$Effects.create($Players$Models.$new)};
+	         case "CreatePlayerDone": var _p1 = _p0._0;
+	           if (_p1.ctor === "Ok") {
+	                 var _p2 = _p1._0;
+	                 var fx = $Effects.task($Task.succeed($Players$Actions.EditPlayer(_p2.id)));
+	                 var updatedCollection = A2($List._op["::"],_p2,model.players);
+	                 return {ctor: "_Tuple2",_0: updatedCollection,_1: fx};
+	              } else {
+	                 var message = $Basics.toString(_p1._0);
+	                 var fx = A2($Effects.map,
+	                 $Players$Actions.TaskDone,
+	                 $Effects.task(A2($Signal.send,model.showErrorAddress,message)));
+	                 return {ctor: "_Tuple2",_0: model.players,_1: fx};
+	              }
 	         case "HopAction": return {ctor: "_Tuple2"
 	                                  ,_0: model.players
 	                                  ,_1: $Effects.none};
-	         case "FetchAllDone": var _p1 = _p0._0;
-	           if (_p1.ctor === "Ok") {
-	                 return {ctor: "_Tuple2",_0: _p1._0,_1: $Effects.none};
+	         case "FetchAllDone": var _p3 = _p0._0;
+	           if (_p3.ctor === "Ok") {
+	                 return {ctor: "_Tuple2",_0: _p3._0,_1: $Effects.none};
 	              } else {
-	                 var errorMessage = $Basics.toString(_p1._0);
+	                 var errorMessage = $Basics.toString(_p3._0);
 	                 var fx = A2($Effects.map,
 	                 $Players$Actions.TaskDone,
 	                 $Effects.task(A2($Signal.send,
@@ -13496,6 +13591,17 @@
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var addBtn = F2(function (address,model) {
+	      return A2($Html.button,
+	      _U.list([$Html$Attributes.$class("btn")
+	              ,A2($Html$Events.onClick,
+	              address,
+	              $Players$Actions.CreatePlayer)]),
+	      _U.list([A2($Html.i,
+	              _U.list([$Html$Attributes.$class("fa fa-user-plus mr1")]),
+	              _U.list([]))
+	              ,$Html.text("Add player")]));
+	   });
 	   var editBtn = F2(function (address,player) {
 	      return A2($Html.button,
 	      _U.list([$Html$Attributes.$class("btn regular")
@@ -13542,8 +13648,11 @@
 	      return A2($Html.div,
 	      _U.list([$Html$Attributes.$class("clearfix mb2 white bg-black")]),
 	      _U.list([A2($Html.div,
-	      _U.list([$Html$Attributes.$class("left p2")]),
-	      _U.list([$Html.text("Players")]))]));
+	              _U.list([$Html$Attributes.$class("left p2")]),
+	              _U.list([$Html.text("Players")]))
+	              ,A2($Html.div,
+	              _U.list([$Html$Attributes.$class("right p1")]),
+	              _U.list([A2(addBtn,address,model)]))]));
 	   });
 	   var view = F2(function (address,model) {
 	      return A2($Html.div,
@@ -13557,7 +13666,8 @@
 	                                     ,nav: nav
 	                                     ,list: list
 	                                     ,playerRow: playerRow
-	                                     ,editBtn: editBtn};
+	                                     ,editBtn: editBtn
+	                                     ,addBtn: addBtn};
 	};
 	Elm.Players = Elm.Players || {};
 	Elm.Players.Edit = Elm.Players.Edit || {};
@@ -13743,44 +13853,6 @@
 	                             ,playerEditPage: playerEditPage
 	                             ,flash: flash
 	                             ,notFoundView: notFoundView};
-	};
-	Elm.Players = Elm.Players || {};
-	Elm.Players.Effects = Elm.Players.Effects || {};
-	Elm.Players.Effects.make = function (_elm) {
-	   "use strict";
-	   _elm.Players = _elm.Players || {};
-	   _elm.Players.Effects = _elm.Players.Effects || {};
-	   if (_elm.Players.Effects.values)
-	   return _elm.Players.Effects.values;
-	   var _U = Elm.Native.Utils.make(_elm),
-	   $Basics = Elm.Basics.make(_elm),
-	   $Debug = Elm.Debug.make(_elm),
-	   $Effects = Elm.Effects.make(_elm),
-	   $Http = Elm.Http.make(_elm),
-	   $Json$Decode = Elm.Json.Decode.make(_elm),
-	   $List = Elm.List.make(_elm),
-	   $Maybe = Elm.Maybe.make(_elm),
-	   $Players$Actions = Elm.Players.Actions.make(_elm),
-	   $Players$Models = Elm.Players.Models.make(_elm),
-	   $Result = Elm.Result.make(_elm),
-	   $Signal = Elm.Signal.make(_elm),
-	   $Task = Elm.Task.make(_elm);
-	   var _op = {};
-	   var memberDecoder = A4($Json$Decode.object3,
-	   $Players$Models.Player,
-	   A2($Json$Decode._op[":="],"id",$Json$Decode.$int),
-	   A2($Json$Decode._op[":="],"name",$Json$Decode.string),
-	   A2($Json$Decode._op[":="],"level",$Json$Decode.$int));
-	   var collectionDecoder = $Json$Decode.list(memberDecoder);
-	   var fetchAllUrl = "http://localhost:4000/players";
-	   var fetchAll = $Effects.task(A2($Task.map,
-	   $Players$Actions.FetchAllDone,
-	   $Task.toResult(A2($Http.get,collectionDecoder,fetchAllUrl))));
-	   return _elm.Players.Effects.values = {_op: _op
-	                                        ,fetchAll: fetchAll
-	                                        ,fetchAllUrl: fetchAllUrl
-	                                        ,collectionDecoder: collectionDecoder
-	                                        ,memberDecoder: memberDecoder};
 	};
 	Elm.Main = Elm.Main || {};
 	Elm.Main.make = function (_elm) {
