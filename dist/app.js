@@ -13199,6 +13199,15 @@
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var ChangeName = F2(function (a,b) {
+	      return {ctor: "ChangeName",_0: a,_1: b};
+	   });
+	   var SaveDone = function (a) {
+	      return {ctor: "SaveDone",_0: a};
+	   };
+	   var ChangeLevel = F2(function (a,b) {
+	      return {ctor: "ChangeLevel",_0: a,_1: b};
+	   });
 	   var DeletePlayerDone = F2(function (a,b) {
 	      return {ctor: "DeletePlayerDone",_0: a,_1: b};
 	   });
@@ -13237,7 +13246,10 @@
 	                                        ,CreatePlayerDone: CreatePlayerDone
 	                                        ,DeletePlayerIntent: DeletePlayerIntent
 	                                        ,DeletePlayer: DeletePlayer
-	                                        ,DeletePlayerDone: DeletePlayerDone};
+	                                        ,DeletePlayerDone: DeletePlayerDone
+	                                        ,ChangeLevel: ChangeLevel
+	                                        ,SaveDone: SaveDone
+	                                        ,ChangeName: ChangeName};
 	};
 	Elm.Routing = Elm.Routing || {};
 	Elm.Routing.make = function (_elm) {
@@ -13440,6 +13452,30 @@
 	   var fetchAll = $Effects.task(A2($Task.map,
 	   $Players$Actions.FetchAllDone,
 	   $Task.toResult(A2($Http.get,collectionDecoder,fetchAllUrl))));
+	   var saveUrl = function (playerId) {
+	      return A2($Basics._op["++"],
+	      "http://localhost:4000/players/",
+	      $Basics.toString(playerId));
+	   };
+	   var saveTask = function (player) {
+	      var body = $Http.string(A2($Json$Encode.encode,
+	      0,
+	      memberEncoded(player)));
+	      var config = {verb: "PATCH"
+	                   ,headers: _U.list([{ctor: "_Tuple2"
+	                                      ,_0: "Content-Type"
+	                                      ,_1: "application/json"}])
+	                   ,url: saveUrl(player.id)
+	                   ,body: body};
+	      return A2($Http.fromJson,
+	      memberDecoder,
+	      A2($Http.send,$Http.defaultSettings,config));
+	   };
+	   var save = function (player) {
+	      return $Effects.task(A2($Task.map,
+	      $Players$Actions.SaveDone,
+	      $Task.toResult(saveTask(player))));
+	   };
 	   var deleteUrl = function (playerId) {
 	      return A2($Basics._op["++"],
 	      "http://localhost:4000/players/",
@@ -13484,6 +13520,9 @@
 	                                        ,$delete: $delete
 	                                        ,deleteUrl: deleteUrl
 	                                        ,deleteTask: deleteTask
+	                                        ,saveUrl: saveUrl
+	                                        ,saveTask: saveTask
+	                                        ,save: save
 	                                        ,fetchAll: fetchAll
 	                                        ,fetchAllUrl: fetchAllUrl
 	                                        ,collectionDecoder: collectionDecoder
@@ -13576,14 +13615,55 @@
 	                 $Effects.task(A2($Signal.send,model.showErrorAddress,message)));
 	                 return {ctor: "_Tuple2",_0: model.players,_1: fx};
 	              }
+	         case "ChangeLevel": var fxForPlayer = function (player) {
+	              if (!_U.eq(player.id,_p0._0)) return $Effects.none; else {
+	                    var updatedPlayer = _U.update(player,
+	                    {level: player.level + _p0._1});
+	                    return _U.cmp(updatedPlayer.level,
+	                    0) > 0 ? $Players$Effects.save(updatedPlayer) : $Effects.none;
+	                 }
+	           };
+	           var fx = $Effects.batch(A2($List.map,
+	           fxForPlayer,
+	           model.players));
+	           return {ctor: "_Tuple2",_0: model.players,_1: fx};
+	         case "SaveDone": var _p5 = _p0._0;
+	           if (_p5.ctor === "Ok") {
+	                 var _p6 = _p5._0;
+	                 var updatedPlayer = function (existing) {
+	                    return _U.eq(existing.id,_p6.id) ? _p6 : existing;
+	                 };
+	                 var updatedCollection = A2($List.map,
+	                 updatedPlayer,
+	                 model.players);
+	                 return {ctor: "_Tuple2"
+	                        ,_0: updatedCollection
+	                        ,_1: $Effects.none};
+	              } else {
+	                 var message = $Basics.toString(_p5._0);
+	                 var fx = A2($Effects.map,
+	                 $Players$Actions.TaskDone,
+	                 $Effects.task(A2($Signal.send,model.showErrorAddress,message)));
+	                 return {ctor: "_Tuple2",_0: model.players,_1: fx};
+	              }
+	         case "ChangeName": var fxForPlayer = function (player) {
+	              if (!_U.eq(player.id,_p0._0)) return $Effects.none; else {
+	                    var updatedPlayer = _U.update(player,{name: _p0._1});
+	                    return $Players$Effects.save(updatedPlayer);
+	                 }
+	           };
+	           var fx = $Effects.batch(A2($List.map,
+	           fxForPlayer,
+	           model.players));
+	           return {ctor: "_Tuple2",_0: model.players,_1: fx};
 	         case "HopAction": return {ctor: "_Tuple2"
 	                                  ,_0: model.players
 	                                  ,_1: $Effects.none};
-	         case "FetchAllDone": var _p5 = _p0._0;
-	           if (_p5.ctor === "Ok") {
-	                 return {ctor: "_Tuple2",_0: _p5._0,_1: $Effects.none};
+	         case "FetchAllDone": var _p7 = _p0._0;
+	           if (_p7.ctor === "Ok") {
+	                 return {ctor: "_Tuple2",_0: _p7._0,_1: $Effects.none};
 	              } else {
-	                 var errorMessage = $Basics.toString(_p5._0);
+	                 var errorMessage = $Basics.toString(_p7._0);
 	                 var fx = A2($Effects.map,
 	                 $Players$Actions.TaskDone,
 	                 $Effects.task(A2($Signal.send,
@@ -13800,7 +13880,15 @@
 	   var inputName = F2(function (address,model) {
 	      return A2($Html.input,
 	      _U.list([$Html$Attributes.$class("field-light")
-	              ,$Html$Attributes.value(model.player.name)]),
+	              ,$Html$Attributes.value(model.player.name)
+	              ,A3($Html$Events.on,
+	              "change",
+	              $Html$Events.targetValue,
+	              function (str) {
+	                 return A2($Signal.message,
+	                 address,
+	                 A2($Players$Actions.ChangeName,model.player.id,str));
+	              })]),
 	      _U.list([]));
 	   });
 	   var formName = F2(function (address,model) {
@@ -13817,14 +13905,20 @@
 	      return A2($Html.a,
 	      _U.list([$Html$Attributes.$class("btn ml1 h1")]),
 	      _U.list([A2($Html.i,
-	      _U.list([$Html$Attributes.$class("fa fa-plus-circle")]),
+	      _U.list([$Html$Attributes.$class("fa fa-plus-circle")
+	              ,A2($Html$Events.onClick,
+	              address,
+	              A2($Players$Actions.ChangeLevel,model.player.id,1))]),
 	      _U.list([]))]));
 	   });
 	   var btnLevelDecrease = F2(function (address,model) {
 	      return A2($Html.a,
 	      _U.list([$Html$Attributes.$class("btn ml1 h1")]),
 	      _U.list([A2($Html.i,
-	      _U.list([$Html$Attributes.$class("fa fa-minus-circle")]),
+	      _U.list([$Html$Attributes.$class("fa fa-minus-circle")
+	              ,A2($Html$Events.onClick,
+	              address,
+	              A2($Players$Actions.ChangeLevel,model.player.id,-1))]),
 	      _U.list([]))]));
 	   });
 	   var formLevel = F2(function (address,model) {

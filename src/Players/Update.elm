@@ -3,8 +3,8 @@ module Players.Update (..) where
 
 import Effects exposing (Effects)
 import Players.Actions exposing (..)
-import Players.Models exposing (new, Player, PlayerId)
-import Players.Effects exposing (create, delete)
+import Players.Models exposing (..)
+import Players.Effects exposing (..)
 import Task
 import Hop
 
@@ -99,6 +99,71 @@ update action model =
                                 |> Effects.map TaskDone
                     in
                         ( model.players, fx )
+
+        ChangeLevel playerId amount ->
+            let 
+                fxForPlayer player =
+                    if player.id /= playerId then
+                        Effects.none
+                    else
+                        let
+                            updatedPlayer =
+                                { player | level = player.level + amount }
+                        in 
+                        if updatedPlayer.level > 0 then
+                            save updatedPlayer
+                        else
+                            Effects.none
+                fx =
+                    List.map fxForPlayer model.players
+                        |> Effects.batch
+            in
+                ( model.players, fx )
+
+        SaveDone result ->
+            case result of
+                Ok player ->
+                    let 
+                        updatedPlayer existing =
+                            if existing.id == player.id then
+                                player
+                            else
+                                existing
+
+                        updatedCollection =
+                            List.map updatedPlayer model.players
+                    in
+                        ( updatedCollection, Effects.none )
+
+                Err error ->
+                    let 
+                        message =
+                            toString error
+
+                        fx =
+                            Signal.send model.showErrorAddress message
+                                |> Effects.task
+                                |> Effects.map TaskDone
+                    in
+                        ( model.players, fx )                
+
+        ChangeName playerId newName ->
+            let
+                fxForPlayer player =
+                    if player.id /= playerId then
+                        Effects.none
+                    else
+                        let
+                            updatedPlayer = 
+                                { player | name = newName }
+                        in 
+                            save updatedPlayer
+
+                fx =
+                    List.map fxForPlayer model.players
+                        |> Effects.batch
+            in
+                ( model.players, fx )                        
 
         HopAction _ ->
             ( model.players, Effects.none )
