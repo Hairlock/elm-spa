@@ -66,7 +66,17 @@
 	const mountNode = document.getElementById('main');
 
 	// Third value are initial values for incoming ports
-	const app = App.embed(App.Main, mountNode);
+	const app = App.embed(App.Main, mountNode, { getDeleteConfirmation: 0 });
+
+	app.ports.askDeleteConfirmation.subscribe(args => {
+		console.log('askDeleteConfirmation', args);
+		const id = args[0];
+		const message = args[1];
+		const response = window.confirm(message);
+		if (response) {
+			app.ports.getDeleteConfirmation.send(id);
+		}
+	});
 
 /***/ },
 /* 2 */
@@ -13189,6 +13199,15 @@
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var DeletePlayerDone = F2(function (a,b) {
+	      return {ctor: "DeletePlayerDone",_0: a,_1: b};
+	   });
+	   var DeletePlayer = function (a) {
+	      return {ctor: "DeletePlayer",_0: a};
+	   };
+	   var DeletePlayerIntent = function (a) {
+	      return {ctor: "DeletePlayerIntent",_0: a};
+	   };
 	   var CreatePlayerDone = function (a) {
 	      return {ctor: "CreatePlayerDone",_0: a};
 	   };
@@ -13215,7 +13234,10 @@
 	                                        ,FetchAllDone: FetchAllDone
 	                                        ,TaskDone: TaskDone
 	                                        ,CreatePlayer: CreatePlayer
-	                                        ,CreatePlayerDone: CreatePlayerDone};
+	                                        ,CreatePlayerDone: CreatePlayerDone
+	                                        ,DeletePlayerIntent: DeletePlayerIntent
+	                                        ,DeletePlayer: DeletePlayer
+	                                        ,DeletePlayerDone: DeletePlayerDone};
 	};
 	Elm.Routing = Elm.Routing || {};
 	Elm.Routing.make = function (_elm) {
@@ -13340,9 +13362,13 @@
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var askDeleteConfirmationMailbox = $Signal.mailbox({ctor: "_Tuple2"
+	                                                      ,_0: 0
+	                                                      ,_1: ""});
 	   var actionsMailbox = $Signal.mailbox($Actions.NoOp);
 	   return _elm.Mailboxes.values = {_op: _op
-	                                  ,actionsMailbox: actionsMailbox};
+	                                  ,actionsMailbox: actionsMailbox
+	                                  ,askDeleteConfirmationMailbox: askDeleteConfirmationMailbox};
 	};
 	Elm.Models = Elm.Models || {};
 	Elm.Models.make = function (_elm) {
@@ -13414,6 +13440,27 @@
 	   var fetchAll = $Effects.task(A2($Task.map,
 	   $Players$Actions.FetchAllDone,
 	   $Task.toResult(A2($Http.get,collectionDecoder,fetchAllUrl))));
+	   var deleteUrl = function (playerId) {
+	      return A2($Basics._op["++"],
+	      "http://localhost:4000/players/",
+	      $Basics.toString(playerId));
+	   };
+	   var deleteTask = function (playerId) {
+	      var config = {verb: "DELETE"
+	                   ,headers: _U.list([{ctor: "_Tuple2"
+	                                      ,_0: "Content-Type"
+	                                      ,_1: "application/json"}])
+	                   ,url: deleteUrl(playerId)
+	                   ,body: $Http.empty};
+	      return A2($Http.fromJson,
+	      $Json$Decode.succeed({ctor: "_Tuple0"}),
+	      A2($Http.send,$Http.defaultSettings,config));
+	   };
+	   var $delete = function (playerId) {
+	      return $Effects.task(A2($Task.map,
+	      $Players$Actions.DeletePlayerDone(playerId),
+	      $Task.toResult(deleteTask(playerId))));
+	   };
 	   var createUrl = "http://localhost:4000/players";
 	   var create = function (player) {
 	      var body = $Http.string(A2($Json$Encode.encode,
@@ -13434,6 +13481,9 @@
 	   return _elm.Players.Effects.values = {_op: _op
 	                                        ,create: create
 	                                        ,createUrl: createUrl
+	                                        ,$delete: $delete
+	                                        ,deleteUrl: deleteUrl
+	                                        ,deleteTask: deleteTask
 	                                        ,fetchAll: fetchAll
 	                                        ,fetchAllUrl: fetchAllUrl
 	                                        ,collectionDecoder: collectionDecoder
@@ -13495,14 +13545,45 @@
 	                 $Effects.task(A2($Signal.send,model.showErrorAddress,message)));
 	                 return {ctor: "_Tuple2",_0: model.players,_1: fx};
 	              }
+	         case "DeletePlayerIntent": var _p3 = _p0._0;
+	           var msg = A2($Basics._op["++"],
+	           "Are you sure you want to delete ",
+	           A2($Basics._op["++"],_p3.name,"?"));
+	           var fx = A2($Effects.map,
+	           $Players$Actions.TaskDone,
+	           $Effects.task(A2($Signal.send,
+	           model.deleteConfirmationAddress,
+	           {ctor: "_Tuple2",_0: _p3.id,_1: msg})));
+	           return {ctor: "_Tuple2",_0: model.players,_1: fx};
+	         case "DeletePlayer": return {ctor: "_Tuple2"
+	                                     ,_0: model.players
+	                                     ,_1: $Players$Effects.$delete(_p0._0)};
+	         case "DeletePlayerDone": var _p4 = _p0._1;
+	           if (_p4.ctor === "Ok") {
+	                 var notDeleted = function (player) {
+	                    return !_U.eq(player.id,_p0._0);
+	                 };
+	                 var updatedCollection = A2($List.filter,
+	                 notDeleted,
+	                 model.players);
+	                 return {ctor: "_Tuple2"
+	                        ,_0: updatedCollection
+	                        ,_1: $Effects.none};
+	              } else {
+	                 var message = $Basics.toString(_p4._0);
+	                 var fx = A2($Effects.map,
+	                 $Players$Actions.TaskDone,
+	                 $Effects.task(A2($Signal.send,model.showErrorAddress,message)));
+	                 return {ctor: "_Tuple2",_0: model.players,_1: fx};
+	              }
 	         case "HopAction": return {ctor: "_Tuple2"
 	                                  ,_0: model.players
 	                                  ,_1: $Effects.none};
-	         case "FetchAllDone": var _p3 = _p0._0;
-	           if (_p3.ctor === "Ok") {
-	                 return {ctor: "_Tuple2",_0: _p3._0,_1: $Effects.none};
+	         case "FetchAllDone": var _p5 = _p0._0;
+	           if (_p5.ctor === "Ok") {
+	                 return {ctor: "_Tuple2",_0: _p5._0,_1: $Effects.none};
 	              } else {
-	                 var errorMessage = $Basics.toString(_p3._0);
+	                 var errorMessage = $Basics.toString(_p5._0);
 	                 var fx = A2($Effects.map,
 	                 $Players$Actions.TaskDone,
 	                 $Effects.task(A2($Signal.send,
@@ -13517,8 +13598,10 @@
 	                         ,_0: model.players
 	                         ,_1: $Effects.none};}
 	   });
-	   var UpdateModel = F2(function (a,b) {
-	      return {players: a,showErrorAddress: b};
+	   var UpdateModel = F3(function (a,b,c) {
+	      return {players: a
+	             ,showErrorAddress: b
+	             ,deleteConfirmationAddress: c};
 	   });
 	   return _elm.Players.Update.values = {_op: _op
 	                                       ,UpdateModel: UpdateModel
@@ -13557,7 +13640,8 @@
 	         case "PlayersAction": var updateModel = {players: model.players
 	                                                 ,showErrorAddress: A2($Signal.forwardTo,
 	                                                 $Mailboxes.actionsMailbox.address,
-	                                                 $Actions.ShowError)};
+	                                                 $Actions.ShowError)
+	                                                 ,deleteConfirmationAddress: $Mailboxes.askDeleteConfirmationMailbox.address};
 	           var _p2 = A2($Players$Update.update,_p0._0,updateModel);
 	           var updatedPlayers = _p2._0;
 	           var fx = _p2._1;
@@ -13591,6 +13675,17 @@
 	   $Result = Elm.Result.make(_elm),
 	   $Signal = Elm.Signal.make(_elm);
 	   var _op = {};
+	   var deleteBtn = F2(function (address,player) {
+	      return A2($Html.button,
+	      _U.list([$Html$Attributes.$class("btn regular mr1")
+	              ,A2($Html$Events.onClick,
+	              address,
+	              $Players$Actions.DeletePlayerIntent(player))]),
+	      _U.list([A2($Html.i,
+	              _U.list([$Html$Attributes.$class("fa fa-trash mr1")]),
+	              _U.list([]))
+	              ,$Html.text("Delete")]));
+	   });
 	   var addBtn = F2(function (address,model) {
 	      return A2($Html.button,
 	      _U.list([$Html$Attributes.$class("btn")
@@ -13625,7 +13720,8 @@
 	              _U.list([$Html.text($Basics.toString(player.level))]))
 	              ,A2($Html.td,
 	              _U.list([]),
-	              _U.list([A2(editBtn,address,player)]))]));
+	              _U.list([A2(editBtn,address,player)
+	                      ,A2(deleteBtn,address,player)]))]));
 	   });
 	   var list = F2(function (address,model) {
 	      return A2($Html.div,
@@ -13667,7 +13763,8 @@
 	                                     ,list: list
 	                                     ,playerRow: playerRow
 	                                     ,editBtn: editBtn
-	                                     ,addBtn: addBtn};
+	                                     ,addBtn: addBtn
+	                                     ,deleteBtn: deleteBtn};
 	};
 	Elm.Players = Elm.Players || {};
 	Elm.Players.Edit = Elm.Players.Edit || {};
@@ -13869,6 +13966,7 @@
 	   $Mailboxes = Elm.Mailboxes.make(_elm),
 	   $Maybe = Elm.Maybe.make(_elm),
 	   $Models = Elm.Models.make(_elm),
+	   $Players$Actions = Elm.Players.Actions.make(_elm),
 	   $Players$Effects = Elm.Players.Effects.make(_elm),
 	   $Result = Elm.Result.make(_elm),
 	   $Routing = Elm.Routing.make(_elm),
@@ -13878,6 +13976,23 @@
 	   $Update = Elm.Update.make(_elm),
 	   $View = Elm.View.make(_elm);
 	   var _op = {};
+	   var getDeleteConfirmation = Elm.Native.Port.make(_elm).inboundSignal("getDeleteConfirmation",
+	   "Int",
+	   function (v) {
+	      return typeof v === "number" && isFinite(v) && Math.floor(v) === v ? v : _U.badPort("an integer",
+	      v);
+	   });
+	   var getDeleteConfirmationSignal = function () {
+	      var toAction = function (id) {
+	         return $Actions.PlayersAction($Players$Actions.DeletePlayer(id));
+	      };
+	      return A2($Signal.map,toAction,getDeleteConfirmation);
+	   }();
+	   var askDeleteConfirmation = Elm.Native.Port.make(_elm).outboundSignal("askDeleteConfirmation",
+	   function (v) {
+	      return [v._0,v._1];
+	   },
+	   $Mailboxes.askDeleteConfirmationMailbox.signal);
 	   var routeRunTask = Elm.Native.Task.make(_elm).perform($Routing.router.run);
 	   var routerSignal = A2($Signal.map,
 	   $Actions.RoutingAction,
@@ -13891,7 +14006,8 @@
 	   }();
 	   var app = $StartApp.start({init: init
 	                             ,inputs: _U.list([routerSignal
-	                                              ,$Mailboxes.actionsMailbox.signal])
+	                                              ,$Mailboxes.actionsMailbox.signal
+	                                              ,getDeleteConfirmationSignal])
 	                             ,update: $Update.update
 	                             ,view: $View.view});
 	   var main = app.html;
@@ -13901,7 +14017,8 @@
 	                             ,init: init
 	                             ,routerSignal: routerSignal
 	                             ,app: app
-	                             ,main: main};
+	                             ,main: main
+	                             ,getDeleteConfirmationSignal: getDeleteConfirmationSignal};
 	};
 
 	module.exports = Elm;
